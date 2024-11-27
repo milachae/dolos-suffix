@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "start": "npm run build && node dist/index.js",
+    "build": "tsc --build --verbose",
+    "test": "tsc --build && ava"
+  },
+  "type": "module",
   "devDependencies": {
+    "ava": "^6.2.0",
     "typescript": "^5.7.2"
   }
 }

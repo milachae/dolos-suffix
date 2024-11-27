@@ -1,5 +1,6 @@
-const world = 'world';
 
-export function hello(who: string = world): string {
-    return `Hello ${who}! `;
+function main(): void {
+    console.log("abc");
 }
+
+main()
