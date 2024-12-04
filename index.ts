@@ -1,6 +1,8 @@
+import {SuffixTree} from "./src/lib/suffixTree.js";
 
 function main(): void {
-    console.log("abc");
+    const tree: SuffixTree = new SuffixTree("abcabxabcd");
+    tree.print();
 }
 
 main()

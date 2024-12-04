@@ -2,7 +2,7 @@
   "scripts": {
     "start": "npm run build && node dist/index.js",
     "build": "tsc --build --verbose",
-    "test": "tsc --build && ava"
+    "test": "tsc --build && ava --serial"
   },
   "type": "module",
   "devDependencies": {
