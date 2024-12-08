@@ -118,11 +118,29 @@ test("Construct suffix tree with a repeating character", t => {
     t.true(tree.root.children.get("$")!.end.value === 4);
 })
 
-test("Construct suffix tree of abcabxabcd", t => {
+test("Construct suffix tree of abcabxabcd and find every substring", t => {
     // abcabxabcd
-    const tree: SuffixTree = new SuffixTree("abcabxabcd");
-    t.true(tree.search("cd"));
+    let text = "abcabxabcd";
+    const tree: SuffixTree = new SuffixTree(text);
+    for (let i = 0; i < 11; i++) {
+        for (let j = i+1; j < 11; j++) {
+            t.true(tree.search(text.substring(i, j)));
+        }
+    }
 })
+
+test("Construct suffix tree of MISSISSIPPI and find every substring", t => {
+    const text = "MISSISSIPPI";
+    const tree: SuffixTree = new SuffixTree(text);
+
+    for (let i = 0; i < 11; i++) {
+        for (let j = i+1; j < 11; j++) {
+            t.true(tree.search(text.substring(i, j)));
+        }
+    }
+})
+
+
 
 test("Should find all substrings in the tree", t => {
     const tree: SuffixTree = new SuffixTree("aba");
