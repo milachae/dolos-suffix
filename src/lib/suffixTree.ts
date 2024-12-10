@@ -102,30 +102,32 @@ export class SuffixTree {
                     node_activeEdge.start += this.activeLength;
                     internal_node.children.set(this.text[node_activeEdge.start], node_activeEdge);
                     this.activeNode.children.set(this.activeEdge, internal_node);
-
-
-                    this.remainingSuffixCount--;
-                    // update activeNode
-                    if (this.activeNode === this.root && this.activeLength > 0) { // APCFER2C1
-                        this.activeLength--;
-                        this.activeEdge = this.text[phase - this.remainingSuffixCount + 1];
-                        this.activeEdgeIndex = phase - this.remainingSuffixCount + 1;
-
-                    } else if (this.activeNode !== this.root) { // APCFER2C2
-                        assert(this.activeNode.suffixLink !== undefined); // Sanity check
-                        this.activeNode = this.activeNode.suffixLink;
-                    }
                 }
 
             } else {
                 // RULE 2
-                this.activeNode.children.set(this.activeEdge, new SuffixTreeNode(suffix_start, this.end));
-                this.remainingSuffixCount--; // leaf created
+                this.activeNode.children.set(this.activeEdge, new SuffixTreeNode(phase, this.end));
                 if (prev_node !== undefined) {
                     prev_node.suffixLink = this.activeNode;
                     prev_node = undefined;
                 }
             }
+
+            if (!foundStopCondition) {
+                // update activeNode
+                this.remainingSuffixCount--; // leaf created
+
+                if (this.activeNode === this.root && this.activeLength > 0) { // APCFER2C1
+                    this.activeLength--;
+                    this.activeEdge = this.text[phase - this.remainingSuffixCount + 1];
+                    this.activeEdgeIndex = phase - this.remainingSuffixCount + 1;
+
+                } else if (this.activeNode !== this.root) { // APCFER2C2
+                    assert(this.activeNode.suffixLink !== undefined); // Sanity check
+                    this.activeNode = this.activeNode.suffixLink;
+                }
+            }
+
         }
     }
 
@@ -135,7 +137,7 @@ export class SuffixTree {
         }
     }
 
-    public search(text: string): boolean {
+    public hasSubstring(text: string): boolean {
 
         let index = 0;
         let notInTree = false;
@@ -157,8 +159,11 @@ export class SuffixTree {
                 notInTree = true;
             }
         }
-
         return !notInTree;
+    }
+
+    public hasSuffix(text: string): boolean {
+        return this.hasSubstring(text + "$");
     }
 
     private printRecursive(node: SuffixTreeNode, depth: number) {

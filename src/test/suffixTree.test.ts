@@ -1,5 +1,19 @@
-import test from "ava";
+import test, {ExecutionContext} from "ava";
 import {SuffixTree} from "../lib/suffixTree.js";
+
+function testAllSubstrings(tree: SuffixTree, text:string, t: ExecutionContext) {
+    for (let i = 0; i < text.length; i++) {
+        for (let j = i+1; j < text.length; j++) {
+            t.true(tree.hasSubstring(text.substring(i, j)));
+        }
+    }
+}
+
+function testAllSuffixes(tree: SuffixTree, text:string, t: ExecutionContext) {
+    for (let i = 0; i <= text.length; i++) {
+        t.true(tree.hasSuffix(text.substring(i, text.length)));
+    }
+}
 
 test("Construct suffix tree with one character", t => {
     /*
@@ -122,46 +136,44 @@ test("Construct suffix tree of abcabxabcd and find every substring", t => {
     // abcabxabcd
     let text = "abcabxabcd";
     const tree: SuffixTree = new SuffixTree(text);
-    for (let i = 0; i < 11; i++) {
-        for (let j = i+1; j < 11; j++) {
-            t.true(tree.search(text.substring(i, j)));
-        }
-    }
+
+    testAllSubstrings(tree, text, t);
+    testAllSuffixes(tree, text, t);
 })
 
 test("Construct suffix tree of MISSISSIPPI and find every substring", t => {
     const text = "MISSISSIPPI";
     const tree: SuffixTree = new SuffixTree(text);
 
-    for (let i = 0; i < 11; i++) {
-        for (let j = i+1; j < 11; j++) {
-            t.true(tree.search(text.substring(i, j)));
-        }
-    }
+    testAllSubstrings(tree, text, t);
+    testAllSuffixes(tree, text, t);
+})
+
+test("Construct suffix tree of EEDEE and find every substring", t => {
+    const text = "EEDE";
+    const tree: SuffixTree = new SuffixTree(text);
+
+    testAllSubstrings(tree, text, t);
+    testAllSuffixes(tree, text, t);
 })
 
 
 
 test("Should find all substrings in the tree", t => {
     const tree: SuffixTree = new SuffixTree("aba");
-    t.true(tree.search(''));
-    t.true(tree.search('a'));
-    t.true(tree.search('ab'));
-    t.true(tree.search('aba'));
-    t.true(tree.search('ba'));
-    t.true(tree.search('b'));
+    t.true(tree.hasSubstring(''));
+    t.true(tree.hasSubstring('a'));
+    t.true(tree.hasSubstring('ab'));
+    t.true(tree.hasSubstring('aba'));
+    t.true(tree.hasSubstring('ba'));
+    t.true(tree.hasSubstring('b'));
 })
 
 test("Should not find non existing substrings", t => {
     const tree: SuffixTree = new SuffixTree("aba");
-    t.false(tree.search('abab'));
-    t.false(tree.search('aa'));
-    t.false(tree.search('bb'));
-    t.false(tree.search('bab'));
-    t.false(tree.search('abaa'));
-})
-
-test("Should not find a string with end character ($)", t => {
-    const tree: SuffixTree = new SuffixTree("ab");
-    t.false(tree.search('$'));
+    t.false(tree.hasSubstring('abab'));
+    t.false(tree.hasSubstring('aa'));
+    t.false(tree.hasSubstring('bb'));
+    t.false(tree.hasSubstring('bab'));
+    t.false(tree.hasSubstring('abaa'));
 })
