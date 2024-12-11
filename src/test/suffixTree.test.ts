@@ -166,15 +166,19 @@ test("Construct suffix tree of BAAABAA and find every substring and suffix", t =
 })
 
 test("Should find all suffixes in random strings", t => {
-    let text: string = "";
     const chars = "ABCDE";
 
-    for (let i = 0; i < 1000; i++) {
-        text += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    for (let j = 0; j < 100; j++) {
+        let text: string = "";
 
-    const tree: SuffixTree = new SuffixTree(text);
-    testAllSuffixes(tree, text, t);
+
+        for (let i = 0; i < 1000; i++) {
+            text += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        const tree: SuffixTree = new SuffixTree(text);
+        testAllSuffixes(tree, text, t);
+    }
 })
 
 
