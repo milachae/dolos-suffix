@@ -132,7 +132,7 @@ test("Construct suffix tree with a repeating character", t => {
     t.true(tree.root.children.get("$")!.end.value === 4);
 })
 
-test("Construct suffix tree of abcabxabcd and find every substring", t => {
+test("Construct suffix tree of abcabxabcd and find every substring and suffix", t => {
     // abcabxabcd
     let text = "abcabxabcd";
     const tree: SuffixTree = new SuffixTree(text);
@@ -141,7 +141,7 @@ test("Construct suffix tree of abcabxabcd and find every substring", t => {
     testAllSuffixes(tree, text, t);
 })
 
-test("Construct suffix tree of MISSISSIPPI and find every substring", t => {
+test("Construct suffix tree of MISSISSIPPI and find every substring and suffix", t => {
     const text = "MISSISSIPPI";
     const tree: SuffixTree = new SuffixTree(text);
 
@@ -149,13 +149,34 @@ test("Construct suffix tree of MISSISSIPPI and find every substring", t => {
     testAllSuffixes(tree, text, t);
 })
 
-test("Construct suffix tree of EEDEE and find every substring", t => {
+test("Construct suffix tree of EEDEE and find every substring and suffix", t => {
     const text = "EEDE";
     const tree: SuffixTree = new SuffixTree(text);
 
     testAllSubstrings(tree, text, t);
     testAllSuffixes(tree, text, t);
 })
+
+test("Construct suffix tree of BAAABAA and find every substring and suffix", t => {
+    const text = "BAAABAA";
+    const tree: SuffixTree = new SuffixTree(text);
+
+    testAllSubstrings(tree, text, t);
+    testAllSuffixes(tree, text, t);
+})
+
+test("Should find all suffixes in random strings", t => {
+    let text: string = "";
+    const chars = "ABCDE";
+
+    for (let i = 0; i < 1000; i++) {
+        text += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    const tree: SuffixTree = new SuffixTree(text);
+    testAllSuffixes(tree, text, t);
+})
+
 
 
 

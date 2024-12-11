@@ -60,22 +60,21 @@ export class SuffixTree {
 
         // Iterate until all suffixes added or Rule 3 executed
         while (this.remainingSuffixCount > 0 && !foundStopCondition){
-            const suffix_start = phase + 1 - this.remainingSuffixCount;
-            
+
             // APCFALZ (activeNode change for Active Length ZERO)
             // no walk down needed here (as activeLength is ZERO) and so next character we look for is current character being processed.
             if (this.activeLength === 0) {
-                this.activeEdge = this.text[suffix_start];
-                this.activeEdgeIndex = suffix_start;
+                this.activeEdge = this.text[phase];
+                this.activeEdgeIndex = phase;
             }
 
+            // walk down the active node
             this.walkDown(); // APCFWD
 
             // Check if there is an edge for the activeEdge
-            if (this.activeNode.children.has(this.activeEdge)) {
+            let node_activeEdge = this.activeNode.children.get(this.activeEdge);
+            if (node_activeEdge !== undefined) {
 
-                // walk down the active node
-                let node_activeEdge = this.activeNode.children.get(this.activeEdge)!;
                 let index_next_char = node_activeEdge.start + this.activeLength;
                 if (this.text[index_next_char] === new_char) {
                     // RULE 3, next char is already in the suffix tree
@@ -119,15 +118,14 @@ export class SuffixTree {
 
                 if (this.activeNode === this.root && this.activeLength > 0) { // APCFER2C1
                     this.activeLength--;
-                    this.activeEdge = this.text[phase - this.remainingSuffixCount + 1];
                     this.activeEdgeIndex = phase - this.remainingSuffixCount + 1;
+                    this.activeEdge = this.text[this.activeEdgeIndex];
 
                 } else if (this.activeNode !== this.root) { // APCFER2C2
                     assert(this.activeNode.suffixLink !== undefined); // Sanity check
                     this.activeNode = this.activeNode.suffixLink;
                 }
             }
-
         }
     }
 
