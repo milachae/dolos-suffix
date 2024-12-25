@@ -3,7 +3,7 @@ import {SuffixTree} from "../lib/suffixTree.js";
 
 function testAllSubstrings(tree: SuffixTree, text:string, t: ExecutionContext) {
     for (let i = 0; i < text.length; i++) {
-        for (let j = i+1; j < text.length; j++) {
+        for (let j = i+1; j <= text.length; j++) {
             t.true(tree.hasSubstring(text.substring(i, j)));
         }
     }
@@ -23,7 +23,7 @@ test("Construct suffix tree with one character", t => {
                   |    \
                   0,2     1,2
      */
-    const tree: SuffixTree = new SuffixTree("a");
+    const tree: SuffixTree = new SuffixTree(["a"]);
     t.is(tree.root.children.size, 2);
     t.true(tree.root.children.has("a"));
     t.true(tree.root.children.get("a")!.start === 0);
@@ -42,7 +42,7 @@ test("Construct suffix tree with different character", t => {
         /        |     |    \
       0,4       1,4   2,4   3,4
     */
-    const tree: SuffixTree = new SuffixTree("abc");
+    const tree: SuffixTree = new SuffixTree(["abc"]);
     t.is(tree.root.children.size, 4);
     t.true(tree.root.children.has("a"));
     t.true(tree.root.children.has("b"));
@@ -74,7 +74,7 @@ test("Construct suffix tree with multiples of one character", t => {
               |  \
             1,3  2,3
  */
-    const tree: SuffixTree = new SuffixTree("aa");
+    const tree: SuffixTree = new SuffixTree(["aa"]);
     t.is(tree.root.children.size, 2);
     t.true(tree.root.children.has("a"));
     t.true(tree.root.children.get("a")!.start === 0);
@@ -107,7 +107,7 @@ test("Construct suffix tree with a repeating character", t => {
           |  \
         1,4  3,4
     */
-    const tree: SuffixTree = new SuffixTree("aba");
+    const tree: SuffixTree = new SuffixTree(["aba"]);
     t.is(tree.root.children.size, 3);
     t.true(tree.root.children.has("a"));
     t.true(tree.root.children.get("a")!.start === 0);
@@ -135,7 +135,7 @@ test("Construct suffix tree with a repeating character", t => {
 test("Construct suffix tree of abcabxabcd and find every substring and suffix", t => {
     // abcabxabcd
     let text = "abcabxabcd";
-    const tree: SuffixTree = new SuffixTree(text);
+    const tree: SuffixTree = new SuffixTree([text]);
 
     testAllSubstrings(tree, text, t);
     testAllSuffixes(tree, text, t);
@@ -143,7 +143,7 @@ test("Construct suffix tree of abcabxabcd and find every substring and suffix", 
 
 test("Construct suffix tree of MISSISSIPPI and find every substring and suffix", t => {
     const text = "MISSISSIPPI";
-    const tree: SuffixTree = new SuffixTree(text);
+    const tree: SuffixTree = new SuffixTree([text]);
 
     testAllSubstrings(tree, text, t);
     testAllSuffixes(tree, text, t);
@@ -151,7 +151,7 @@ test("Construct suffix tree of MISSISSIPPI and find every substring and suffix",
 
 test("Construct suffix tree of EEDEE and find every substring and suffix", t => {
     const text = "EEDE";
-    const tree: SuffixTree = new SuffixTree(text);
+    const tree: SuffixTree = new SuffixTree([text]);
 
     testAllSubstrings(tree, text, t);
     testAllSuffixes(tree, text, t);
@@ -159,7 +159,7 @@ test("Construct suffix tree of EEDEE and find every substring and suffix", t => 
 
 test("Construct suffix tree of BAAABAA and find every substring and suffix", t => {
     const text = "BAAABAA";
-    const tree: SuffixTree = new SuffixTree(text);
+    const tree: SuffixTree = new SuffixTree([text]);
 
     testAllSubstrings(tree, text, t);
     testAllSuffixes(tree, text, t);
@@ -176,7 +176,7 @@ test("Should find all suffixes in random strings", t => {
             text += chars.charAt(Math.floor(Math.random() * chars.length));
         }
 
-        const tree: SuffixTree = new SuffixTree(text);
+        const tree: SuffixTree = new SuffixTree([text]);
         testAllSuffixes(tree, text, t);
     }
 })
@@ -185,7 +185,7 @@ test("Should find all suffixes in random strings", t => {
 
 
 test("Should find all substrings in the tree", t => {
-    const tree: SuffixTree = new SuffixTree("aba");
+    const tree: SuffixTree = new SuffixTree(["aba"]);
     t.true(tree.hasSubstring(''));
     t.true(tree.hasSubstring('a'));
     t.true(tree.hasSubstring('ab'));
@@ -195,7 +195,7 @@ test("Should find all substrings in the tree", t => {
 })
 
 test("Should not find non existing substrings", t => {
-    const tree: SuffixTree = new SuffixTree("aba");
+    const tree: SuffixTree = new SuffixTree(["aba"]);
     t.false(tree.hasSubstring('abab'));
     t.false(tree.hasSubstring('aa'));
     t.false(tree.hasSubstring('bb'));

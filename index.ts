@@ -8,12 +8,12 @@ function  benchmark(): void {
         text += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    const tree: SuffixTree = new SuffixTree(text);
+    const tree: SuffixTree = new SuffixTree([text]);
 }
 
 function main(): void {
-    const tree: SuffixTree = new SuffixTree("BAAABAA");
+    const tree: SuffixTree = new SuffixTree(["abcabxabcd"]);
     tree.print();
 }
 
-benchmark()
+main()
