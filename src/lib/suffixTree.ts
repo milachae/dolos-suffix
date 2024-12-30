@@ -16,6 +16,14 @@ export class SuffixTreeNode {
     public length(): number {
         return this.end.value - this.start
     }
+
+    public toObject(): {} {
+        let children: {[key: string]: {}} = {};
+        for (const [k, child] of this.children) {
+            children[k] = child.toObject();
+        }
+        return {"start": this.start, "end": this.end.value, "file": this.file, "children": children};
+    }
 }
 
 
@@ -132,6 +140,7 @@ export class SuffixTree {
 
     private build() {
         for (let text_i = 0; text_i < this.texts.length; text_i++) {
+            this.end = {value: 0};
             for (let phase = 0; phase <  this.texts[text_i].length; phase++) {
                 this.extend(text_i, phase);
             }
@@ -182,5 +191,9 @@ export class SuffixTree {
 
     public print() {
         this.printRecursive(this.root, 0);
+    }
+
+    public toObject() {
+        return this.root.toObject();
     }
 }
