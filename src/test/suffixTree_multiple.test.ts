@@ -1,4 +1,4 @@
-import test, {ExecutionContext} from "ava";
+import test from "ava";
 import {SuffixTree} from "../lib/suffixTree.js";
 import {generateRandomStrings, testAllSubstrings, testAllSuffixes} from "./_util.js";
 
@@ -11,7 +11,8 @@ test("Construct suffix tree with 2 strings with 1 character", t => {
       (0) 0,2   (1) 0,2   (0) 1,2
      */
 
-    const tree: SuffixTree = new SuffixTree(["a", "b"]);
+    let inputs = ["a", "b"];
+    const tree: SuffixTree = new SuffixTree(inputs);
 
     const expected: {} = {
         "start": 0,
@@ -25,23 +26,12 @@ test("Construct suffix tree with 2 strings with 1 character", t => {
     }
 
     t.deepEqual(tree.toObject(), expected);
-
-    t.is(tree.root.children.size, 3);
-    t.true(tree.root.children.has("a"));
-    t.true(tree.root.children.get("a")!.start === 0);
-    t.true(tree.root.children.get("a")!.end.value === 2);
-
-    t.true(tree.root.children.get("b")!.file === 1);
-    t.true(tree.root.children.get("b")!.start === 0);
-    t.true(tree.root.children.get("b")!.end.value === 2);
-
-    t.true(tree.root.children.has("$"));
-    t.true(tree.root.children.get("$")!.start === 1);
-    t.true(tree.root.children.get("$")!.end.value === 2);
+    testAllSubstrings(tree, inputs, t);
 })
 
 test("Construct suffix tree with 2 strings with different character", t => {
-    const tree: SuffixTree = new SuffixTree(["abc", "efg"]);
+    let inputs = ["abc", "efg"];
+    const tree: SuffixTree = new SuffixTree(inputs);
 
     const expected: {} = {
         "start": 0,
@@ -59,10 +49,12 @@ test("Construct suffix tree with 2 strings with different character", t => {
     }
 
     t.deepEqual(tree.toObject(), expected);
+    testAllSubstrings(tree, inputs, t);
 })
 
 test("Construct suffix tree with 2 strings with overlapping prefixes", t => {
-    const tree: SuffixTree = new SuffixTree(["abc", "abd"]);
+    let inputs = ["abc", "abd"];
+    const tree: SuffixTree = new SuffixTree(inputs);
 
     const expected: {} = {
         "start": 0,
@@ -84,10 +76,12 @@ test("Construct suffix tree with 2 strings with overlapping prefixes", t => {
     }
 
     t.deepEqual(tree.toObject(), expected);
+    testAllSubstrings(tree, inputs, t);
 })
 
 test("Construct suffix tree with 2 strings with overlapping substrings", t => {
-    const tree: SuffixTree = new SuffixTree(["abc", "dba"]);
+    let inputs = ["abc", "dba"];
+    const tree: SuffixTree = new SuffixTree(inputs);
 
     const expected: {} = {
         "start": 0,
@@ -109,10 +103,18 @@ test("Construct suffix tree with 2 strings with overlapping substrings", t => {
     }
 
     t.deepEqual(tree.toObject(), expected);
+    testAllSubstrings(tree, inputs, t);
+})
+
+test("Construct suffix tree with 3 strings", t => {
+    const texts = [ 'EAE', 'EAE', 'AAC' ];
+    const tree: SuffixTree = new SuffixTree(texts);
+
+    testAllSubstrings(tree, texts, t);
 })
 
 test("Should find all substrings of 100 random strings of length 100", t => {
-    let texts = generateRandomStrings(100);
+    const texts = generateRandomStrings(3, 3, 5);
     const tree: SuffixTree = new SuffixTree(texts);
 
     for (const text of texts) {

@@ -172,7 +172,7 @@ test("Should not find non existing substrings", t => {
 })
 
 test("Should find all suffixes in random strings", t => {
-    for (const text of generateRandomStrings(100, 1000)) {
+    for (const text of generateRandomStrings(100, 1000, 5)) {
         const tree: SuffixTree = new SuffixTree([text]);
         testAllSuffixes(tree, text, t);
     }

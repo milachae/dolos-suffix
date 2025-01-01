@@ -1,23 +1,36 @@
-import test from "ava";
 import {SuffixTree} from "../lib/suffixTree.js";
 import {ExecutionContext} from "ava";
 
-export function testAllSubstrings(tree: SuffixTree, text:string, t: ExecutionContext) {
-    for (let i = 0; i < text.length; i++) {
-        for (let j = i+1; j <= text.length; j++) {
-            t.true(tree.hasSubstring(text.substring(i, j)));
+export function testAllSubstrings(tree: SuffixTree, inputs:string, t: ExecutionContext): void
+export function testAllSubstrings(tree: SuffixTree, inputs:string[], t: ExecutionContext): void
+export function testAllSubstrings(tree: SuffixTree, inputs:string | string[], t: ExecutionContext): void {
+    inputs = typeof inputs === "string" ? [inputs] : inputs;
+
+    for (const input of inputs) {
+        for (let i = 0; i < input.length; i++) {
+            for (let j = i+1; j <= input.length; j++) {
+                t.true(tree.hasSubstring(input.substring(i, j)));
+            }
         }
     }
 }
 
-export function testAllSuffixes(tree: SuffixTree, text:string, t: ExecutionContext) {
-    for (let i = 0; i <= text.length; i++) {
-        t.true(tree.hasSuffix(text.substring(i, text.length)));
+export function testAllSuffixes(tree: SuffixTree, inputs:string, t: ExecutionContext): void;
+export function testAllSuffixes(tree: SuffixTree, inputs:string[], t: ExecutionContext): void;
+export function testAllSuffixes(tree: SuffixTree, inputs:string | string[], t: ExecutionContext): void {
+
+    inputs = typeof inputs === "string" ? [inputs] : inputs;
+
+    for (const input of inputs) {
+        for (let i = 0; i <= input.length; i++) {
+            t.true(tree.hasSuffix(input.substring(i, input.length)));
+        }
     }
 }
 
-export function generateRandomString(string_length: number = 100): string {
-    const chars = "ABCDE";
+
+export function generateRandomString(string_length: number = 100, alphabet_size: number=26): string {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(0, alphabet_size);
     let text: string = "";
 
     for (let i = 0; i < string_length; i++) {
@@ -27,11 +40,11 @@ export function generateRandomString(string_length: number = 100): string {
     return text;
 }
 
-export function generateRandomStrings(amount: number, string_length: number = 100): string[] {
+export function generateRandomStrings(amount: number, string_length: number = 100, alphabet_size: number=26): string[] {
     const strings = [];
 
     for (let i = 0; i < amount; i++) {
-        strings.push(generateRandomString(string_length));
+        strings.push(generateRandomString(string_length, alphabet_size));
     }
     return strings;
 }
