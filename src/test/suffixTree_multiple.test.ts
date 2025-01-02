@@ -17,11 +17,11 @@ test("Construct suffix tree with 2 strings with 1 character", t => {
     const expected: {} = {
         "start": 0,
         "end": 0,
-        "file": 0,
+        "input_i": 0,
         "children": {
-            "a": {"start": 0, "end": 2, "file": 0, "children": {}},
-            "b": {"start": 0, "end": 2, "file": 1, "children": {}},
-            "$": {"start": 1, "end": 2, "file": 0, "children": {}}
+            "a": {"start": 0, "end": 2, "input_i": 0, "children": {}},
+            "b": {"start": 0, "end": 2, "input_i": 1, "children": {}},
+            "$": {"start": 1, "end": 2, "input_i": 0, "children": {}}
         }
     }
 
@@ -36,15 +36,15 @@ test("Construct suffix tree with 2 strings with different character", t => {
     const expected: {} = {
         "start": 0,
         "end": 0,
-        "file": 0,
+        "input_i": 0,
         "children": {
-            "a": {"start": 0, "end": 4, "file": 0, "children": {}},
-            "b": {"start": 1, "end": 4, "file": 0, "children": {}},
-            "c": {"start": 2, "end": 4, "file": 0, "children": {}},
-            "e": {"start": 0, "end": 4, "file": 1, "children": {}},
-            "f": {"start": 1, "end": 4, "file": 1, "children": {}},
-            "g": {"start": 2, "end": 4, "file": 1, "children": {}},
-            "$": {"start": 3, "end": 4, "file": 0, "children": {}}
+            "a": {"start": 0, "end": 4, "input_i": 0, "children": {}},
+            "b": {"start": 1, "end": 4, "input_i": 0, "children": {}},
+            "c": {"start": 2, "end": 4, "input_i": 0, "children": {}},
+            "e": {"start": 0, "end": 4, "input_i": 1, "children": {}},
+            "f": {"start": 1, "end": 4, "input_i": 1, "children": {}},
+            "g": {"start": 2, "end": 4, "input_i": 1, "children": {}},
+            "$": {"start": 3, "end": 4, "input_i": 0, "children": {}}
         }
     }
 
@@ -59,19 +59,19 @@ test("Construct suffix tree with 2 strings with overlapping prefixes", t => {
     const expected: {} = {
         "start": 0,
         "end": 0,
-        "file": 0,
+        "input_i": 0,
         "children": {
-            "a": {"start": 0, "end": 2, "file": 0, "children": {
-                    "d": {"start": 2, "end": 4, "file": 1, "children": {}},
-                    "c": {"start": 2, "end": 4, "file": 0, "children": {}}
+            "a": {"start": 0, "end": 2, "input_i": 0, "children": {
+                    "d": {"start": 2, "end": 4, "input_i": 1, "children": {}},
+                    "c": {"start": 2, "end": 4, "input_i": 0, "children": {}}
                 }},
-            "b": {"start": 1, "end": 2, "file": 0, "children": {
-                    "d": {"start": 2, "end": 4, "file": 1, "children": {}},
-                    "c": {"start": 2, "end": 4, "file": 0, "children": {}}
+            "b": {"start": 1, "end": 2, "input_i": 0, "children": {
+                    "d": {"start": 2, "end": 4, "input_i": 1, "children": {}},
+                    "c": {"start": 2, "end": 4, "input_i": 0, "children": {}}
                 }},
-            "c": {"start": 2, "end": 4, "file": 0, "children": {}},
-            "d": {"start": 2, "end": 4, "file": 1, "children": {}},
-            "$": {"start": 3, "end": 4, "file": 0, "children": {}}
+            "c": {"start": 2, "end": 4, "input_i": 0, "children": {}},
+            "d": {"start": 2, "end": 4, "input_i": 1, "children": {}},
+            "$": {"start": 3, "end": 4, "input_i": 0, "children": {}}
         }
     }
 
@@ -86,19 +86,19 @@ test("Construct suffix tree with 2 strings with overlapping substrings", t => {
     const expected: {} = {
         "start": 0,
         "end": 0,
-        "file": 0,
+        "input_i": 0,
         "children": {
-            "a": {"start": 0, "end": 1, "file": 0, "children": {
-                    "b": {"start": 1, "end": 4, "file": 0, "children": {}},
-                    "$": {"start": 3, "end": 4, "file": 1, "children": {}}
+            "a": {"start": 0, "end": 1, "input_i": 0, "children": {
+                    "b": {"start": 1, "end": 4, "input_i": 0, "children": {}},
+                    "$": {"start": 3, "end": 4, "input_i": 1, "children": {}}
                 }},
-            "d": {"start": 0, "end": 4, "file": 1, "children": {}},
-            "b": {"start": 1, "end": 2, "file": 0, "children": {
-                    "c": {"start": 2, "end": 4, "file": 0, "children": {}},
-                    "a": {"start": 2, "end": 4, "file": 1, "children": {}},
+            "d": {"start": 0, "end": 4, "input_i": 1, "children": {}},
+            "b": {"start": 1, "end": 2, "input_i": 0, "children": {
+                    "c": {"start": 2, "end": 4, "input_i": 0, "children": {}},
+                    "a": {"start": 2, "end": 4, "input_i": 1, "children": {}},
                 }},
-            "c": {"start": 2, "end": 4, "file": 0, "children": {}},
-            "$": {"start": 3, "end": 4, "file": 0, "children": {}}
+            "c": {"start": 2, "end": 4, "input_i": 0, "children": {}},
+            "$": {"start": 3, "end": 4, "input_i": 0, "children": {}}
         }
     }
 
@@ -113,11 +113,10 @@ test("Construct suffix tree with 3 strings", t => {
 })
 
 test("Should find all substrings of 100 random strings of length 100", t => {
-    const texts = generateRandomStrings(100, 100, 5);
+    const texts = generateRandomStrings(100, 100, 4);
     const tree: SuffixTree = new SuffixTree(texts);
 
     for (const text of texts) {
         testAllSubstrings(tree, text, t);
     }
-    tree.print()
 })
