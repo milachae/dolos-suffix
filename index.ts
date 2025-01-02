@@ -1,4 +1,5 @@
 import {SuffixTree} from "./src/lib/suffixTree.js";
+import {testAllSubstrings} from "./src/test/_util.js";
 
 function  benchmark(): void {
     let text: string = "";
@@ -12,8 +13,8 @@ function  benchmark(): void {
 }
 
 function main(): void {
-    const tree: SuffixTree = new SuffixTree(["abcabxabcd"]);
-    tree.print();
+    const inputs = [ 'EAE', 'EAC', 'AAC' ];
+    const tree: SuffixTree = new SuffixTree(inputs);
 }
 
 main()

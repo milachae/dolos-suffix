@@ -4,14 +4,20 @@ export function assert(condition: boolean, message?: string): asserts condition 
     }
 }
 
+let ID: number = 0;
+
 export class SuffixTreeNode {
 
     public children: Map<string, SuffixTreeNode> = new Map<string, SuffixTreeNode>();
     public suffixLink: SuffixTreeNode | undefined;
+    public id: number = 0;
 
     // start inclusive
     // end exclusive
-    constructor(public start: number, public end: { value: number }, public file: number) {}
+    constructor(public start: number, public end: { value: number }, public file: number) {
+        this.id = ID;
+        ID++;
+    }
 
     public length(): number {
         return this.end.value - this.start
@@ -45,16 +51,15 @@ export class SuffixTree {
         this.activeEdge = texts[0];
         this.activeEdgeIndex = 0;
         this.texts = texts.map(text => text + "$");
-
         this.build();
     }
 
-    private walkDown() {
+    private walkDown(file: number) {
         let node_activeEdge = this.activeNode.children.get(this.activeEdge)!;
         while (node_activeEdge !== undefined && this.activeLength >= node_activeEdge.length()) {
             this.activeNode = node_activeEdge;
             this.activeEdgeIndex += this.activeNode.length();
-            this.activeEdge = this.texts[this.activeNode.file][this.activeEdgeIndex];
+            this.activeEdge = this.texts[file][this.activeEdgeIndex];
             this.activeLength -= this.activeNode.length();
             node_activeEdge = this.activeNode.children.get(this.activeEdge)!;
         }
@@ -78,7 +83,7 @@ export class SuffixTree {
             }
 
             // walk down the active node
-            this.walkDown(); // APCFWD
+            this.walkDown(file); // APCFWD
 
             // Check if there is an edge for the activeEdge
             let node_activeEdge = this.activeNode.children.get(this.activeEdge);
@@ -139,10 +144,15 @@ export class SuffixTree {
     }
 
     private build() {
-        for (let text_i = 0; text_i < this.texts.length; text_i++) {
+        for (let input_i = 0; input_i < this.texts.length; input_i++) {
             this.end = {value: 0};
-            for (let phase = 0; phase <  this.texts[text_i].length; phase++) {
-                this.extend(text_i, phase);
+            this.activeNode = this.root;
+            this.activeLength = 0;
+            this.activeEdge = this.texts[input_i];
+            this.activeEdgeIndex = 0;
+            this.remainingSuffixCount = 0;
+            for (let phase = 0; phase <  this.texts[input_i].length; phase++) {
+                this.extend(input_i, phase);
             }
         }
     }
@@ -180,8 +190,9 @@ export class SuffixTree {
         const spacing = "    ".repeat(depth);
         const start_stop = `(${node.start}, ${node.end.value})`
         const substring = this.texts[node.file].substring(node.start, node.end.value);
+        const suffixlink = node.suffixLink !== undefined ? `-> ${node.suffixLink.id}` : ``;
         if (depth !== 0) {
-            console.log(`${spacing}N ${start_stop}: ${substring}`);
+            console.log(`${spacing}N-${node.id}  ${start_stop}: ${substring} ${suffixlink}`);
         } else {
             console.log(`ROOT`);
         }

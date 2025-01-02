@@ -107,17 +107,17 @@ test("Construct suffix tree with 2 strings with overlapping substrings", t => {
 })
 
 test("Construct suffix tree with 3 strings", t => {
-    const texts = [ 'EAE', 'EAE', 'AAC' ];
-    const tree: SuffixTree = new SuffixTree(texts);
-
-    testAllSubstrings(tree, texts, t);
+    const inputs = [ 'EAE', 'EAC', 'AAC' ];
+    const tree: SuffixTree = new SuffixTree(inputs);
+    testAllSubstrings(tree, inputs, t);
 })
 
 test("Should find all substrings of 100 random strings of length 100", t => {
-    const texts = generateRandomStrings(3, 3, 5);
+    const texts = generateRandomStrings(100, 100, 5);
     const tree: SuffixTree = new SuffixTree(texts);
 
     for (const text of texts) {
         testAllSubstrings(tree, text, t);
     }
+    tree.print()
 })
