@@ -1,6 +1,6 @@
 import test from "ava";
 import {SuffixTree} from "../lib/suffixTree.js";
-import {generateRandomStrings, testAllSubstrings, testAllSuffixes} from "./_util.js";
+import {generateRandomStrings, getLcsLengthDyn, testAllSubstrings, testAllSuffixes} from "./_util.js";
 
 test("Construct suffix tree with 2 strings with 1 character", t => {
     /*
@@ -121,8 +121,37 @@ test("Should find all substrings of 100 random strings of length 100", t => {
     }
 })
 
-test.only("Should find common longest substring of 2 strings", t => {
+test("Should find common longest substring of 2 strings", t => {
     const inputs = [ 'CAECEABD', 'BAECEABC' ];
     const tree: SuffixTree = new SuffixTree(inputs);
-    t.is(tree.longestCommonSubsequence(0, 1), 6);
+    t.is(tree.longestCommonSubstring(0, 1), 6);
+})
+
+test("Should correctly assign inputs when a path slices", t => {
+    const inputs = [ 'ABCABD', 'AD' ];
+    const tree: SuffixTree = new SuffixTree(inputs);
+    t.is(tree.longestCommonSubstring(0, 1), 1);
+})
+
+test("another edge case", t => {
+    const inputs = ['AB', 'FB']
+
+    const tree: SuffixTree = new SuffixTree(inputs);
+    t.is(tree.longestCommonSubstring(0,1), getLcsLengthDyn(inputs[0], inputs[1]));
+})
+
+test("Should handle this edge case", t=> {
+    const inputs = ['CBAB', 'CBAA','BBBA', 'CCBA']
+
+    const tree: SuffixTree = new SuffixTree(inputs);
+    t.is(tree.longestCommonSubstring(2,3), getLcsLengthDyn(inputs[2], inputs[3]));
+})
+
+test("Should handle this random test", t => {
+    const inputs = generateRandomStrings(100,100, 4);
+    const tree: SuffixTree = new SuffixTree(inputs);
+
+    for (let i = 0; i < inputs.length-1; i++) {
+        t.is(tree.longestCommonSubstring(i, i+1), getLcsLengthDyn(inputs[i], inputs[i+1]));
+    }
 })

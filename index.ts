@@ -15,4 +15,23 @@ function test(): void {
     tree.print();
 }
 
-test()
+function test2(): void {
+    // const inputs = ['CBAB', 'CBAA','BBBA', 'CCBA']
+    const inputs = ['QCBA', 'FCBA']
+    const tree: SuffixTree = new SuffixTree(inputs);
+    tree.print();
+}
+
+function test3(): void {
+    const inputs = ['AB', 'CB']
+    const tree: SuffixTree = new SuffixTree(inputs);
+    tree.print();
+}
+
+function test4(): void {
+    const inputs = [ 'ABCABD', 'AD' ];
+    const tree: SuffixTree = new SuffixTree(inputs);
+    tree.print();
+}
+
+test4()

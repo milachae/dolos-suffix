@@ -48,3 +48,28 @@ export function generateRandomStrings(amount: number, string_length: number = 10
     }
     return strings;
 }
+
+// https://www.geeksforgeeks.org/longest-common-substring-dp-29/
+export function getLcsLengthDyn(s1: string, s2: string): number {
+    const m = s1.length;
+    const n = s2.length;
+
+    // Create a table to store lengths of longest
+    // common suffixes of substrings.
+    let LCSuf = Array.from(Array(m + 1), () => Array(n + 1).fill(0));
+    let res = 0;
+
+    // Build LCSuf[m+1][n+1] in bottom-up fashion.
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (s1[i - 1] === s2[j - 1]) {
+                LCSuf[i][j] = LCSuf[i - 1][j - 1] + 1;
+                res = Math.max(res, LCSuf[i][j]);
+            } else {
+                LCSuf[i][j] = 0;
+            }
+        }
+    }
+
+    return res;
+}
