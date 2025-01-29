@@ -133,14 +133,14 @@ test("Should correctly assign inputs when a path slices", t => {
     t.is(tree.longestCommonSubstring(0, 1), 1);
 })
 
-test("another edge case", t => {
+test("Should have the correct inputs at the leafs", t => {
     const inputs = ['AB', 'FB']
 
     const tree: SuffixTree = new SuffixTree(inputs);
     t.is(tree.longestCommonSubstring(0,1), getLcsLengthDyn(inputs[0], inputs[1]));
 })
 
-test("Should handle this edge case", t=> {
+test("Should handle this extra edge case", t=> {
     const inputs = ['CBAB', 'CBAA','BBBA', 'CCBA']
 
     const tree: SuffixTree = new SuffixTree(inputs);
