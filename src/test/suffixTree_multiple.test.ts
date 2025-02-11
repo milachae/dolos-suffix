@@ -1,6 +1,11 @@
 import test from "ava";
 import {SuffixTree} from "../lib/suffixTree.js";
-import {generateRandomStrings, getLcsLengthDyn, testAllSubstrings, testAllSuffixes} from "./_util.js";
+import {
+    generateRandomStrings,
+    getLcsLengthDyn,
+    stringsToNumbers,
+    testAllSubstrings,
+} from "./_util.js";
 
 test("Construct suffix tree with 2 strings with 1 character", t => {
     /*
@@ -11,7 +16,7 @@ test("Construct suffix tree with 2 strings with 1 character", t => {
       (0) 0,2   (1) 0,2   (0) 1,2
      */
 
-    let inputs = ["a", "b"];
+    let inputs = [[0], [1]];
     const tree: SuffixTree = new SuffixTree(inputs);
 
     const expected: {} = {
@@ -19,8 +24,8 @@ test("Construct suffix tree with 2 strings with 1 character", t => {
         "end": 0,
         "input": 0,
         "children": {
-            "a": {"start": 0, "end": 2, "input": 0, "children": {}},
-            "b": {"start": 0, "end": 2, "input": 1, "children": {}},
+            0: {"start": 0, "end": 2, "input": 0, "children": {}},
+            1: {"start": 0, "end": 2, "input": 1, "children": {}},
             "$": {"start": 1, "end": 2, "input": 0, "children": {}}
         }
     }
@@ -30,7 +35,7 @@ test("Construct suffix tree with 2 strings with 1 character", t => {
 })
 
 test("Construct suffix tree with 2 strings with different character", t => {
-    let inputs = ["abc", "efg"];
+    let inputs = [[0, 1, 2], [3,4,5]];
     const tree: SuffixTree = new SuffixTree(inputs);
 
     const expected: {} = {
@@ -38,12 +43,12 @@ test("Construct suffix tree with 2 strings with different character", t => {
         "end": 0,
         "input": 0,
         "children": {
-            "a": {"start": 0, "end": 4, "input": 0, "children": {}},
-            "b": {"start": 1, "end": 4, "input": 0, "children": {}},
-            "c": {"start": 2, "end": 4, "input": 0, "children": {}},
-            "e": {"start": 0, "end": 4, "input": 1, "children": {}},
-            "f": {"start": 1, "end": 4, "input": 1, "children": {}},
-            "g": {"start": 2, "end": 4, "input": 1, "children": {}},
+            0: {"start": 0, "end": 4, "input": 0, "children": {}},
+            1: {"start": 1, "end": 4, "input": 0, "children": {}},
+            2: {"start": 2, "end": 4, "input": 0, "children": {}},
+            3: {"start": 0, "end": 4, "input": 1, "children": {}},
+            4: {"start": 1, "end": 4, "input": 1, "children": {}},
+            5: {"start": 2, "end": 4, "input": 1, "children": {}},
             "$": {"start": 3, "end": 4, "input": 0, "children": {}}
         }
     }
@@ -53,7 +58,7 @@ test("Construct suffix tree with 2 strings with different character", t => {
 })
 
 test("Construct suffix tree with 2 strings with overlapping prefixes", t => {
-    let inputs = ["abc", "abd"];
+    let inputs = [[0, 1, 2], [0,1,3]];
     const tree: SuffixTree = new SuffixTree(inputs);
 
     const expected: {} = {
@@ -61,16 +66,16 @@ test("Construct suffix tree with 2 strings with overlapping prefixes", t => {
         "end": 0,
         "input": 0,
         "children": {
-            "a": {"start": 0, "end": 2, "input": 0, "children": {
-                    "d": {"start": 2, "end": 4, "input": 1, "children": {}},
-                    "c": {"start": 2, "end": 4, "input": 0, "children": {}}
+            0: {"start": 0, "end": 2, "input": 0, "children": {
+                    3: {"start": 2, "end": 4, "input": 1, "children": {}},
+                    2: {"start": 2, "end": 4, "input": 0, "children": {}}
                 }},
-            "b": {"start": 1, "end": 2, "input": 0, "children": {
-                    "d": {"start": 2, "end": 4, "input": 1, "children": {}},
-                    "c": {"start": 2, "end": 4, "input": 0, "children": {}}
+            1: {"start": 1, "end": 2, "input": 0, "children": {
+                    3: {"start": 2, "end": 4, "input": 1, "children": {}},
+                    2: {"start": 2, "end": 4, "input": 0, "children": {}}
                 }},
-            "c": {"start": 2, "end": 4, "input": 0, "children": {}},
-            "d": {"start": 2, "end": 4, "input": 1, "children": {}},
+            2: {"start": 2, "end": 4, "input": 0, "children": {}},
+            3: {"start": 2, "end": 4, "input": 1, "children": {}},
             "$": {"start": 3, "end": 4, "input": 0, "children": {}}
         }
     }
@@ -80,7 +85,7 @@ test("Construct suffix tree with 2 strings with overlapping prefixes", t => {
 })
 
 test("Construct suffix tree with 2 strings with overlapping substrings", t => {
-    let inputs = ["abc", "dba"];
+    let inputs = [[0, 1, 2], [3,1,0]];
     const tree: SuffixTree = new SuffixTree(inputs);
 
     const expected: {} = {
@@ -88,16 +93,16 @@ test("Construct suffix tree with 2 strings with overlapping substrings", t => {
         "end": 0,
         "input": 0,
         "children": {
-            "a": {"start": 0, "end": 1, "input": 0, "children": {
-                    "b": {"start": 1, "end": 4, "input": 0, "children": {}},
+            0: {"start": 0, "end": 1, "input": 0, "children": {
+                    1: {"start": 1, "end": 4, "input": 0, "children": {}},
                     "$": {"start": 3, "end": 4, "input": 1, "children": {}}
                 }},
-            "d": {"start": 0, "end": 4, "input": 1, "children": {}},
-            "b": {"start": 1, "end": 2, "input": 0, "children": {
-                    "c": {"start": 2, "end": 4, "input": 0, "children": {}},
-                    "a": {"start": 2, "end": 4, "input": 1, "children": {}},
+            3: {"start": 0, "end": 4, "input": 1, "children": {}},
+            1: {"start": 1, "end": 2, "input": 0, "children": {
+                    2: {"start": 2, "end": 4, "input": 0, "children": {}},
+                    0: {"start": 2, "end": 4, "input": 1, "children": {}},
                 }},
-            "c": {"start": 2, "end": 4, "input": 0, "children": {}},
+            2: {"start": 2, "end": 4, "input": 0, "children": {}},
             "$": {"start": 3, "end": 4, "input": 0, "children": {}}
         }
     }
@@ -107,7 +112,7 @@ test("Construct suffix tree with 2 strings with overlapping substrings", t => {
 })
 
 test("Construct suffix tree with 3 strings", t => {
-    const inputs = [ 'EAE', 'EAC', 'AAC' ];
+    const inputs = [ [4,0,4], [4,0,2], [0,0,2] ];
     const tree: SuffixTree = new SuffixTree(inputs);
     testAllSubstrings(tree, inputs, t);
 })
@@ -122,26 +127,26 @@ test("Should find all substrings of 100 random strings of length 100", t => {
 })
 
 test("Should find common longest substring of 2 strings", t => {
-    const inputs = [ 'CAECEABD', 'BAECEABC' ];
+    const inputs = stringsToNumbers([ 'CAECEABD', 'BAECEABC']);
     const tree: SuffixTree = new SuffixTree(inputs);
     t.is(tree.longestCommonSubstring(0, 1), 6);
 })
 
 test("Should correctly assign inputs when a path slices", t => {
-    const inputs = [ 'ABCABD', 'AD' ];
+    const inputs = stringsToNumbers([ 'ABCABD', 'AD' ]);
     const tree: SuffixTree = new SuffixTree(inputs);
     t.is(tree.longestCommonSubstring(0, 1), 1);
 })
 
 test("Should have the correct inputs at the leafs", t => {
-    const inputs = ['AB', 'FB']
+    const inputs = stringsToNumbers(['AB', 'FB']);
 
     const tree: SuffixTree = new SuffixTree(inputs);
     t.is(tree.longestCommonSubstring(0,1), getLcsLengthDyn(inputs[0], inputs[1]));
 })
 
 test("Should handle this extra edge case", t=> {
-    const inputs = ['CBAB', 'CBAA','BBBA', 'CCBA']
+    const inputs = stringsToNumbers(['CBAB', 'CBAA','BBBA', 'CCBA']);
 
     const tree: SuffixTree = new SuffixTree(inputs);
     t.is(tree.longestCommonSubstring(2,3), getLcsLengthDyn(inputs[2], inputs[3]));

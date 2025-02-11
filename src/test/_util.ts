@@ -1,46 +1,69 @@
 import {SuffixTree} from "../lib/suffixTree.js";
 import {ExecutionContext} from "ava";
 
-export function testAllSubstrings(tree: SuffixTree, inputs:string, t: ExecutionContext): void
-export function testAllSubstrings(tree: SuffixTree, inputs:string[], t: ExecutionContext): void
-export function testAllSubstrings(tree: SuffixTree, inputs:string | string[], t: ExecutionContext): void {
-    inputs = typeof inputs === "string" ? [inputs] : inputs;
+type iType = (number|"$");
+
+export function stringToNumbers(str: string): number[] {
+    let result: number[] = [];
+    for (const character of str) {
+        result.push(character.toLowerCase().charCodeAt(0));
+    }
+
+    return result
+}
+
+export function stringsToNumbers(strs: string[]): number[][] {
+    let result: number[][] = [];
+    for (const str of strs) {
+        result.push(stringToNumbers(str));
+    }
+
+    return result
+}
+
+function is1DArray(arr: any): boolean {
+    return Array.isArray(arr) && arr.every(item => !Array.isArray(item));
+}
+
+
+export function testAllSubstrings(tree: SuffixTree, inputs:iType[], t: ExecutionContext): void
+export function testAllSubstrings(tree: SuffixTree, inputs:iType[][], t: ExecutionContext): void
+export function testAllSubstrings(tree: SuffixTree, inputs:iType[] | iType[][], t: ExecutionContext): void {
+    inputs = is1DArray(inputs) ? [inputs as iType[]] : (inputs as iType[][]);
 
     for (const input of inputs) {
         for (let i = 0; i < input.length; i++) {
             for (let j = i+1; j <= input.length; j++) {
-                t.true(tree.hasSubstring(input.substring(i, j)));
+                t.true(tree.hasSubstring(input.slice(i, j)));
             }
         }
     }
 }
 
-export function testAllSuffixes(tree: SuffixTree, inputs:string, t: ExecutionContext): void;
-export function testAllSuffixes(tree: SuffixTree, inputs:string[], t: ExecutionContext): void;
-export function testAllSuffixes(tree: SuffixTree, inputs:string | string[], t: ExecutionContext): void {
-
-    inputs = typeof inputs === "string" ? [inputs] : inputs;
+export function testAllSuffixes(tree: SuffixTree, inputs:iType[], t: ExecutionContext): void;
+export function testAllSuffixes(tree: SuffixTree, inputs:iType[][], t: ExecutionContext): void;
+export function testAllSuffixes(tree: SuffixTree, inputs:iType[] | iType[][], t: ExecutionContext): void {
+    inputs = is1DArray(inputs) ? [inputs as iType[]] : (inputs as iType[][]);
 
     for (const input of inputs) {
         for (let i = 0; i <= input.length; i++) {
-            t.true(tree.hasSuffix(input.substring(i, input.length)));
+            t.true(tree.hasSuffix(input.slice(i, input.length)));
         }
     }
 }
 
 
-export function generateRandomString(string_length: number = 100, alphabet_size: number=26): string {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(0, alphabet_size);
-    let text: string = "";
+export function generateRandomString(string_length: number = 100, alphabet_size: number=10): iType[] {
+    let text: iType[] = [];
 
     for (let i = 0; i < string_length; i++) {
-        text += chars.charAt(Math.floor(Math.random() * chars.length));
+        text.push(Math.floor(Math.random() * alphabet_size));
     }
 
     return text;
 }
 
-export function generateRandomStrings(amount: number, string_length: number = 100, alphabet_size: number=26): string[] {
+export function generateRandomStrings(amount: number, string_length: number = 100, alphabet_size: number=10): iType[][] {
     const strings = [];
 
     for (let i = 0; i < amount; i++) {
@@ -50,7 +73,7 @@ export function generateRandomStrings(amount: number, string_length: number = 10
 }
 
 // https://www.geeksforgeeks.org/longest-common-substring-dp-29/
-export function getLcsLengthDyn(s1: string, s2: string): number {
+export function getLcsLengthDyn(s1: iType[], s2: iType[]): number {
     const m = s1.length;
     const n = s2.length;
 

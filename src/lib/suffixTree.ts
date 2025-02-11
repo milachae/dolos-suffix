@@ -4,14 +4,32 @@ export function assert(condition: boolean, message?: string): asserts condition 
     }
 }
 
+/**
+ * Check if a1 starts with a2
+ * @param a1
+ * @param a2
+ * @private
+ */
+function arrayStartsWith(a1: iType[], a2: iType[]): boolean {
+    for (let i = 0; i < a2.length; i++) {
+        if (a1[i] !== a2[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 let ID: number = 0;
+type iType = (number|"$");
 
 /**
  *
  */
 export class SuffixTreeNode {
 
-    public children: Map<string, SuffixTreeNode> = new Map<string, SuffixTreeNode>();
+    public children: Map<iType, SuffixTreeNode> = new Map<iType, SuffixTreeNode>();
     public suffixLink: SuffixTreeNode | undefined;
     public id: number = 0;
     public inputs: number[];
@@ -50,7 +68,7 @@ export class SuffixTree {
 
     public root: SuffixTreeNode = new SuffixTreeNode(0, {value: 0}, 0);
 
-    private readonly texts:string[];
+    private readonly texts:iType[][];
 
     // Variables needed during the building phase
     private end: { value: number } = { value: 0 };
@@ -58,10 +76,10 @@ export class SuffixTree {
     private activeNode: SuffixTreeNode = this.root;
     private activeEdgeIndex: number = 0;
     private activeLength: number = 0;
-    private activeEdge: string = "";
+    private activeEdge: iType = 0;
 
-    constructor(texts: string[]) {
-        this.texts = texts.map((text, index) => index == 0 ? text + "$": text + "$");
+    constructor(texts: iType[][]) {
+        this.texts = texts.map((text) => text.concat(["$"]));
         this.root.suffixLink = this.root;
         this.resetBuildVariables(0);
         this.build();
@@ -77,7 +95,7 @@ export class SuffixTree {
         this.end = {value: 0};
         this.activeNode = this.root;
         this.activeLength = 0;
-        this.activeEdge = this.texts[i];
+        this.activeEdge = this.texts[i][0];
         this.activeEdgeIndex = 0;
         this.remainingSuffixCount = 0;
     }
@@ -129,7 +147,7 @@ export class SuffixTree {
         this.end.value++; // RULE 1
         this.remainingSuffixCount++;
         let foundStopCondition = false;
-        const new_char = this.texts[input][phase];
+        const new_number = this.texts[input][phase];
         let prev_node: SuffixTreeNode|undefined;
 
         // Iterate until all suffixes are added or Rule 3 is executed
@@ -138,7 +156,7 @@ export class SuffixTree {
             // APCFALZ (activeNode change for Active Length ZERO)
             // no walk down is needed here (as activeLength is ZERO), so the next character we look for is current character being processed.
             if (this.activeLength === 0) {
-                this.activeEdge = new_char;
+                this.activeEdge = new_number;
                 this.activeEdgeIndex = phase;
             }
 
@@ -149,13 +167,13 @@ export class SuffixTree {
             let node_activeEdge = this.activeNode.children.get(this.activeEdge);
             if (node_activeEdge !== undefined) {
 
-                let index_next_char = node_activeEdge.start + this.activeLength;
-                if (this.texts[node_activeEdge.input][index_next_char] === new_char) {
+                let index_next_number = node_activeEdge.start + this.activeLength;
+                if (this.texts[node_activeEdge.input][index_next_number] === new_number) {
                     // RULE 3, next char is already in the suffix tree
                     // When rule 3 applies in any phase i, then before we move on to next phase i+1,
                     // we increment activeLength by 1.
 
-                    if (index_next_char === node_activeEdge.end.value-1) {
+                    if (index_next_number === node_activeEdge.end.value-1) {
                         node_activeEdge.addInput(input);
                     }
                     if (!end) {
@@ -171,14 +189,14 @@ export class SuffixTree {
                 } else {
                     // RULE
                     let leaf_node = new SuffixTreeNode(phase,this.end, input);
-                    let internal_node = new SuffixTreeNode(node_activeEdge.start, {value: index_next_char}, node_activeEdge.input);
+                    let internal_node = new SuffixTreeNode(node_activeEdge.start, {value: index_next_number}, node_activeEdge.input);
 
                     if (prev_node !== undefined) {
                         prev_node.suffixLink = internal_node;
                     }
                     prev_node = internal_node;
 
-                    internal_node.children.set(new_char, leaf_node);
+                    internal_node.children.set(new_number, leaf_node);
                     node_activeEdge.start += this.activeLength;
                     internal_node.children.set(this.texts[node_activeEdge.input][node_activeEdge.start], node_activeEdge);
                     this.activeNode.children.set(this.activeEdge, internal_node);
@@ -270,7 +288,7 @@ export class SuffixTree {
      *
      * @param text
      */
-    public hasSubstring(text: string): boolean {
+    public hasSubstring(text: iType[]): boolean {
 
         let index = 0;
         let notInTree = false;
@@ -281,9 +299,9 @@ export class SuffixTree {
                 currentNode = currentNode.children.get(text[index])! // safe because checked in if;
                 let length = currentNode.end.value - currentNode.start;
 
-                const edgeString = this.texts[currentNode.input].substring(currentNode.start, currentNode.end.value);
-                const textString = text.substring(index, index+length)
-                if (!edgeString.startsWith(textString)) {
+                const edgeString = this.texts[currentNode.input].slice(currentNode.start, currentNode.end.value);
+                const textString = text.slice(index, index+length)
+                if (!arrayStartsWith(edgeString,textString)) {
                     notInTree = true;
                 }
 
@@ -299,8 +317,8 @@ export class SuffixTree {
      *
      * @param text
      */
-    public hasSuffix(text: string): boolean {
-        return this.hasSubstring(text + "$");
+    public hasSuffix(text: iType[]): boolean {
+        return this.hasSubstring(text.concat(["$"]));
     }
 
     /**
@@ -312,7 +330,7 @@ export class SuffixTree {
     private printRecursive(node: SuffixTreeNode, depth: number) {
         const spacing = "    ".repeat(depth);
         const start_stop = `(${node.start}, ${node.end.value})`
-        const substring = this.texts[node.input].substring(node.start, node.end.value);
+        const substring = this.texts[node.input].slice(node.start, node.end.value);
         const suffixlink = node.suffixLink !== undefined ? `-> ${node.suffixLink.id}` : ``;
         const inputs =  node.inputs.join(",")
         if (depth !== 0) {
