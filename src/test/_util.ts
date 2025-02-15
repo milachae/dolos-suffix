@@ -1,8 +1,6 @@
 import {SuffixTree} from "../lib/suffixTree.js";
 import {ExecutionContext} from "ava";
 
-type iType = (number|"$");
-
 export function stringToNumbers(str: string): number[] {
     let result: number[] = [];
     for (const character of str) {
@@ -26,10 +24,10 @@ function is1DArray(arr: any): boolean {
 }
 
 
-export function testAllSubstrings(tree: SuffixTree, inputs:iType[], t: ExecutionContext): void
-export function testAllSubstrings(tree: SuffixTree, inputs:iType[][], t: ExecutionContext): void
-export function testAllSubstrings(tree: SuffixTree, inputs:iType[] | iType[][], t: ExecutionContext): void {
-    inputs = is1DArray(inputs) ? [inputs as iType[]] : (inputs as iType[][]);
+export function testAllSubstrings(tree: SuffixTree, inputs:number[], t: ExecutionContext): void
+export function testAllSubstrings(tree: SuffixTree, inputs:number[][], t: ExecutionContext): void
+export function testAllSubstrings(tree: SuffixTree, inputs:number[] | number[][], t: ExecutionContext): void {
+    inputs = is1DArray(inputs) ? [inputs as number[]] : (inputs as number[][]);
 
     for (const input of inputs) {
         for (let i = 0; i < input.length; i++) {
@@ -40,10 +38,10 @@ export function testAllSubstrings(tree: SuffixTree, inputs:iType[] | iType[][], 
     }
 }
 
-export function testAllSuffixes(tree: SuffixTree, inputs:iType[], t: ExecutionContext): void;
-export function testAllSuffixes(tree: SuffixTree, inputs:iType[][], t: ExecutionContext): void;
-export function testAllSuffixes(tree: SuffixTree, inputs:iType[] | iType[][], t: ExecutionContext): void {
-    inputs = is1DArray(inputs) ? [inputs as iType[]] : (inputs as iType[][]);
+export function testAllSuffixes(tree: SuffixTree, inputs:number[], t: ExecutionContext): void;
+export function testAllSuffixes(tree: SuffixTree, inputs:number[][], t: ExecutionContext): void;
+export function testAllSuffixes(tree: SuffixTree, inputs:number[] | number[][], t: ExecutionContext): void {
+    inputs = is1DArray(inputs) ? [inputs as number[]] : (inputs as number[][]);
 
     for (const input of inputs) {
         for (let i = 0; i <= input.length; i++) {
@@ -53,8 +51,8 @@ export function testAllSuffixes(tree: SuffixTree, inputs:iType[] | iType[][], t:
 }
 
 
-export function generateRandomString(string_length: number = 100, alphabet_size: number=10): iType[] {
-    let text: iType[] = [];
+export function generateRandomString(string_length: number = 100, alphabet_size: number=10): number[] {
+    let text: number[] = [];
 
     for (let i = 0; i < string_length; i++) {
         text.push(Math.floor(Math.random() * alphabet_size));
@@ -63,7 +61,7 @@ export function generateRandomString(string_length: number = 100, alphabet_size:
     return text;
 }
 
-export function generateRandomStrings(amount: number, string_length: number = 100, alphabet_size: number=10): iType[][] {
+export function generateRandomStrings(amount: number, string_length: number = 100, alphabet_size: number=10): number[][] {
     const strings = [];
 
     for (let i = 0; i < amount; i++) {
@@ -73,7 +71,7 @@ export function generateRandomStrings(amount: number, string_length: number = 10
 }
 
 // https://www.geeksforgeeks.org/longest-common-substring-dp-29/
-export function getLcsLengthDyn(s1: iType[], s2: iType[]): number {
+export function getLcsLengthDyn(s1: number[], s2: number[]): number {
     const m = s1.length;
     const n = s2.length;
 

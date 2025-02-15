@@ -32,6 +32,7 @@ export class SuffixTreeNode {
     public children: Map<iType, SuffixTreeNode> = new Map<iType, SuffixTreeNode>();
     public suffixLink: SuffixTreeNode | undefined;
     public id: number = 0;
+    public leaf: boolean = false;
     public inputs: number[];
 
     // start inclusive
@@ -68,7 +69,7 @@ export class SuffixTree {
 
     public root: SuffixTreeNode = new SuffixTreeNode(0, {value: 0}, 0);
 
-    private readonly texts:iType[][];
+    private readonly texts:iType[][] = [];
 
     // Variables needed during the building phase
     private end: { value: number } = { value: 0 };
@@ -78,8 +79,8 @@ export class SuffixTree {
     private activeLength: number = 0;
     private activeEdge: iType = 0;
 
-    constructor(texts: iType[][]) {
-        this.texts = texts.map((text) => text.concat(["$"]));
+    constructor(texts: number[][]) {
+        texts.forEach((text) => this.texts.push([...text, "$"]));
         this.root.suffixLink = this.root;
         this.resetBuildVariables(0);
         this.build();
@@ -150,7 +151,7 @@ export class SuffixTree {
         const new_number = this.texts[input][phase];
         let prev_node: SuffixTreeNode|undefined;
 
-        // Iterate until all suffixes are added or Rule 3 is executed
+        // Iterate until all suffixes are added or Rule 3 has been triggered
         while (this.remainingSuffixCount > 0 && !foundStopCondition){
 
             // APCFALZ (activeNode change for Active Length ZERO)
