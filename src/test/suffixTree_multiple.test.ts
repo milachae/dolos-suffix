@@ -173,7 +173,7 @@ test("small failing case", t => {
     }
 })
 
-test("Should calculate the longest common substrings all at once", t => {
+test("Should calculate the longest common substrings all at once simple", t => {
     const inputs = stringsToNumbers(['CBAB', 'CBAA','BBBA', 'CCBA']);
     const tree: SuffixTree = new SuffixTree(inputs);
 
@@ -183,6 +183,23 @@ test("Should calculate the longest common substrings all at once", t => {
         [2,2,0,2],
         [3,3,2,0]
     ]
+    const result: number[][] = tree.allLongestCommonSubstrings();
+    t.deepEqual(result, expected);
+})
+
+test("Should calculate the longest common substrings all at once random", t => {
+    const inputs = generateRandomStrings(10,10, 5);
+    const tree: SuffixTree = new SuffixTree(inputs);
+
+    const expected: number[][] = Array.from({ length: inputs.length }, () => Array(inputs.length).fill(0));
+    for (let i = 0; i < inputs.length; i++) {
+        for (let j = i+1; j < inputs.length; j++) {
+            expected[i][j] = getLcsLengthDyn(inputs[i], inputs[j]);
+            expected[j][i] = expected[i][j];
+        }
+    }
+
+
     const result: number[][] = tree.allLongestCommonSubstrings();
     t.deepEqual(result, expected);
 })

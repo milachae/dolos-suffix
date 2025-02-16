@@ -18,11 +18,12 @@ function main(): void {
    console.timeEnd("pluto");
 
    console.time("lcs");
-   for (let i = 0; i < codes.length; i++) {
+   /*for (let i = 0; i < codes.length; i++) {
       for (let j = i+1; j < codes.length; j++) {
          s.longestCommonSubstring(i,j);
       }
-   }
+   }*/
+   s.allLongestCommonSubstrings()
    console.timeEnd("lcs");
 }
 
