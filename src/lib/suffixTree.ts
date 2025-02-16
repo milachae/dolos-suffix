@@ -219,7 +219,7 @@ export class SuffixTree {
                 if (this.activeNode === this.root && this.activeLength > 0) { // APCFER2C1
                     this.activeLength--;
                     this.activeEdgeIndex = phase - this.remainingSuffixCount + 1;
-                    this.activeEdge = this.texts[this.activeNode.input][this.activeEdgeIndex];
+                    this.activeEdge = this.texts[input][this.activeEdgeIndex];
 
                 } else if (this.activeNode !== this.root) { // APCFER2C2
                     assert(this.activeNode.suffixLink !== undefined); // Sanity check
@@ -283,6 +283,31 @@ export class SuffixTree {
     public longestCommonSubstring(input1: number, input2: number): number {
         console.assert(input1 < this.texts.length && input2 < this.texts.length);
         return this.longestCommonSubsequenceRecursive(input1, input2, this.root);
+    }
+
+    private allLongestCommonSubstringsRecursive(node: SuffixTreeNode, depth:number, results: number[][]){
+        depth += (node.children.size > 0 ? node.length() : node.length()-1);
+
+        for (let i = 0; i < node.inputs.length; i++) {
+            for (let j = i+1; j < node.inputs.length; j++) {
+                const i_input = node.inputs[i];
+                const j_input = node.inputs[j];
+                if (results[i_input][j_input] < depth) {
+                    results[i_input][j_input] = depth;
+                    results[j_input][i_input] = depth;
+                }
+            }
+        }
+
+        for (const child of node.children.values()) {
+            this.allLongestCommonSubstringsRecursive(child, depth, results);
+        }
+    }
+
+    public allLongestCommonSubstrings(): number[][] {
+        const results = Array.from({ length: this.texts.length }, () => Array(this.texts.length).fill(0));
+        this.allLongestCommonSubstringsRecursive(this.root, 0, results);
+        return results;
     }
 
     /**
