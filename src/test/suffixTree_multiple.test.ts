@@ -153,7 +153,19 @@ test("Should handle this extra edge case", t=> {
 })
 
 test("Should handle this random test", t => {
-    const inputs = generateRandomStrings(100,100, 4);
+    const inputs = generateRandomStrings(100,100, 300);
+    const tree: SuffixTree = new SuffixTree(inputs);
+
+    for (let i = 0; i < inputs.length-1; i++) {
+        t.is(tree.longestCommonSubstring(i, i+1), getLcsLengthDyn(inputs[i], inputs[i+1]));
+    }
+})
+
+test("small failing case", t => {
+    const inputs = [
+        [1,2,3],
+        [0,1,2,3]
+    ];
     const tree: SuffixTree = new SuffixTree(inputs);
 
     for (let i = 0; i < inputs.length-1; i++) {

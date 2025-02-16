@@ -219,7 +219,7 @@ export class SuffixTree {
                 if (this.activeNode === this.root && this.activeLength > 0) { // APCFER2C1
                     this.activeLength--;
                     this.activeEdgeIndex = phase - this.remainingSuffixCount + 1;
-                    this.activeEdge = this.texts[this.activeNode.input][this.activeEdgeIndex];
+                    this.activeEdge = this.texts[input][this.activeEdgeIndex];
 
                 } else if (this.activeNode !== this.root) { // APCFER2C2
                     assert(this.activeNode.suffixLink !== undefined); // Sanity check
