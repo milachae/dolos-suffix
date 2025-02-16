@@ -285,6 +285,31 @@ export class SuffixTree {
         return this.longestCommonSubsequenceRecursive(input1, input2, this.root);
     }
 
+    private allLongestCommonSubstringsRecursive(node: SuffixTreeNode, depth:number, results: number[][]){
+        depth += (node.children.size > 0 ? node.length() : node.length()-1);
+
+        for (let i = 0; i < node.inputs.length; i++) {
+            for (let j = i+1; j < node.inputs.length; j++) {
+                const i_input = node.inputs[i];
+                const j_input = node.inputs[j];
+                if (results[i_input][j_input] < depth) {
+                    results[i_input][j_input] = depth;
+                    results[j_input][i_input] = depth;
+                }
+            }
+        }
+
+        for (const child of node.children.values()) {
+            this.allLongestCommonSubstringsRecursive(child, depth, results);
+        }
+    }
+
+    public allLongestCommonSubstrings(): number[][] {
+        const results = Array.from({ length: this.texts.length }, () => Array(this.texts.length).fill(0));
+        this.allLongestCommonSubstringsRecursive(this.root, 0, results);
+        return results;
+    }
+
     /**
      *
      * @param text

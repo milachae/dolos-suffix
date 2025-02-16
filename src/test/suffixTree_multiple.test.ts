@@ -172,3 +172,17 @@ test("small failing case", t => {
         t.is(tree.longestCommonSubstring(i, i+1), getLcsLengthDyn(inputs[i], inputs[i+1]));
     }
 })
+
+test("Should calculate the longest common substrings all at once", t => {
+    const inputs = stringsToNumbers(['CBAB', 'CBAA','BBBA', 'CCBA']);
+    const tree: SuffixTree = new SuffixTree(inputs);
+
+    const expected: number[][] = [
+        [0,3,2,3],
+        [3,0,2,3],
+        [2,2,0,2],
+        [3,3,2,0]
+    ]
+    const result: number[][] = tree.allLongestCommonSubstrings();
+    t.deepEqual(result, expected);
+})
