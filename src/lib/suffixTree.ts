@@ -47,6 +47,10 @@ export class SuffixTreeNode {
         return this.end.value - this.start
     }
 
+    public isLeaf(): boolean {
+        return this.children.size === 0;
+    }
+
     public toObject(): {} {
         let children: {[key: string]: {}} = {};
         for (const [k, child] of this.children) {
@@ -229,6 +233,11 @@ export class SuffixTree {
         }
     }
 
+    /**
+     * Propagate the inputs of all leaves bottom-up through the tree.
+     * @param node
+     * @private
+     */
     private propagateInputs(node:SuffixTreeNode): number[] {
         for (const child of node.children.values()) {
             node.addInput(...this.propagateInputs(child));
@@ -238,7 +247,7 @@ export class SuffixTree {
 
 
     /**
-     *
+     * Start building the suffix tree.
      * @private
      */
     private build() {
@@ -263,30 +272,30 @@ export class SuffixTree {
      */
     private longestCommonSubsequenceRecursive(input1: number, input2: number, node: SuffixTreeNode): number {
         if (node.inputs.includes(input1) && node.inputs.includes(input2)) {
-            let a: number[] = Array.from(node.children.values())
-                .map(node => this.longestCommonSubsequenceRecursive(input1, input2, node))
 
-            if (a.length > 0) {
-                return node.length()+Math.max(...a);
-            } else {
+            if (node.isLeaf()) {
                 return node.length()-1;
+            } else {
+                return node.length()+Math.max(...(Array.from(node.children.values())
+                    .map(node => this.longestCommonSubsequenceRecursive(input1, input2, node))));
             }
         }
         return 0;
     }
 
     /**
-     *
-     * @param input1
-     * @param input2
+     * Calculate the longest common substring between 2 inputs.
+     * @param input1 The index of the first input
+     * @param input2 The index of the second input
      */
     public longestCommonSubstring(input1: number, input2: number): number {
         console.assert(input1 < this.texts.length && input2 < this.texts.length);
         return this.longestCommonSubsequenceRecursive(input1, input2, this.root);
     }
 
+
     private allLongestCommonSubstringsRecursive(node: SuffixTreeNode, depth:number, results: number[][]){
-        depth += (node.children.size > 0 ? node.length() : node.length()-1);
+        depth += (node.isLeaf() ? node.length()-1 : node.length());
 
         for (let i = 0; i < node.inputs.length; i++) {
             for (let j = i+1; j < node.inputs.length; j++) {
@@ -304,10 +313,51 @@ export class SuffixTree {
         }
     }
 
+    /**
+     * Calculate all the longest common substrings between all pairs of inputs.
+     */
     public allLongestCommonSubstrings(): number[][] {
         const results = Array.from({ length: this.texts.length }, () => Array(this.texts.length).fill(0));
         this.allLongestCommonSubstringsRecursive(this.root, 0, results);
         return results;
+    }
+
+    private match(node: SuffixTreeNode, input1: number, input2: number): [number, number, number, number, number] {
+        let x, y;
+        let [a, b, c] = [0, 0, 0];
+
+        if (node.isLeaf() && node.length() > 1) {
+            x = node.inputs.includes(input1) ? 1 : 0;
+            y= node.inputs.includes(input2) ? 1 : 0;
+        } else {
+            [x, y, a, b, c] = [...node.children.values()]
+                .filter(child => child.inputs.includes(input1) || child.inputs.includes(input2))
+                .map(child => this.match(child, input1, input2))
+                .reduce(([x, y, a, b, c], [xx, yy, aa, bb, cc]) => [x+xx, y+yy, a+aa, b+bb, c+cc], [0, 0, 0, 0, 0]);
+        }
+        a += Math.min(x,y)
+        b += x - Math.min(x,y)
+        c += y - Math.min(x,y)
+
+        return [x, y, a, b, c];
+    }
+
+    /**
+     * Compare 2 files. It will give a percentage on how similar these 2 inputs are.
+     * @param input1
+     * @param input2
+     */
+    public compare(input1: number, input2: number): number {
+        let [_x, _y, a, b, c] = this.match(this.root, input1, input2);
+        return a / (a+b+c);
+    }
+
+    public compareAll() {
+        for (let i = 0; i < this.texts.length; i++) {
+            for (let j = i+1; j < this.texts.length; j++) {
+                this.compare(i, j);
+            }
+        }
     }
 
     /**
@@ -376,7 +426,7 @@ export class SuffixTree {
     }
 
     /**
-     *
+     * Convert the suffix tree to an object.
      */
     public toObject() {
         return this.root.toObject();

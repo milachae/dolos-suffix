@@ -5,26 +5,25 @@ import Parser from "tree-sitter";
 // import t from "tree-sitter-typescript";
 import Python from "tree-sitter-python";
 
-function main(): void {
+function runPluto() {
    const parser = new Parser();
    parser.setLanguage(Python);
 
    const texts = readDir("../dolos-benchmark/datasets/plutokiller");
-
    const codes = texts.map(t => textToNumbers(parser, t));
 
    console.time("pluto");
-   const s = new SuffixTree(codes);
+   const suffixTree = new SuffixTree(codes);
    console.timeEnd("pluto");
 
-   console.time("lcs");
-   /*for (let i = 0; i < codes.length; i++) {
-      for (let j = i+1; j < codes.length; j++) {
-         s.longestCommonSubstring(i,j);
-      }
-   }*/
-   s.allLongestCommonSubstrings()
    console.timeEnd("lcs");
+   const a = suffixTree.allLongestCommonSubstrings();
+   console.timeEnd("lcs");
+}
+
+function main(): void {
+   const s = new SuffixTree([[7,8,9,10,11,12], [1,2,3, 4,5,6]]);
+   console.log(s.compare(0,1))
 }
 
 main();
