@@ -106,7 +106,7 @@ export class SuffixTree {
     }
 
     /**
-     *
+     * Walk down the activeNode according to the activeLength
      * @param input
      * @private
      */
@@ -119,6 +119,18 @@ export class SuffixTree {
             this.activeLength -= this.activeNode.length();
             node_activeEdge = this.activeNode.children.get(this.activeEdge)!;
         }
+    }
+
+    private splitEdge() {
+
+    }
+
+    private addLeaf() {
+
+    }
+
+    private followSuffixLink() {
+
     }
 
     /**
@@ -181,14 +193,15 @@ export class SuffixTree {
                     if (index_next_number === node_activeEdge.end.value-1) {
                         node_activeEdge.addInput(input);
                     }
-                    if (!end) {
-                        this.activeLength++; // APCFER3
-                        foundStopCondition = true;
-                    }
 
                     if (prev_node !== undefined) {
                         prev_node.suffixLink = this.activeNode;
                         prev_node = undefined;
+                    }
+
+                    if (!end) {
+                        this.activeLength++; // APCFER3
+                        foundStopCondition = true;
                     }
 
                 } else {
@@ -320,44 +333,6 @@ export class SuffixTree {
         const results = Array.from({ length: this.texts.length }, () => Array(this.texts.length).fill(0));
         this.allLongestCommonSubstringsRecursive(this.root, 0, results);
         return results;
-    }
-
-    private match(node: SuffixTreeNode, input1: number, input2: number): [number, number, number, number, number] {
-        let x, y;
-        let [a, b, c] = [0, 0, 0];
-
-        if (node.isLeaf() && node.length() > 1) {
-            x = node.inputs.includes(input1) ? 1 : 0;
-            y= node.inputs.includes(input2) ? 1 : 0;
-        } else {
-            [x, y, a, b, c] = [...node.children.values()]
-                .filter(child => child.inputs.includes(input1) || child.inputs.includes(input2))
-                .map(child => this.match(child, input1, input2))
-                .reduce(([x, y, a, b, c], [xx, yy, aa, bb, cc]) => [x+xx, y+yy, a+aa, b+bb, c+cc], [0, 0, 0, 0, 0]);
-        }
-        a += Math.min(x,y)
-        b += x - Math.min(x,y)
-        c += y - Math.min(x,y)
-
-        return [x, y, a, b, c];
-    }
-
-    /**
-     * Compare 2 files. It will give a percentage on how similar these 2 inputs are.
-     * @param input1
-     * @param input2
-     */
-    public compare(input1: number, input2: number): number {
-        let [_x, _y, a, b, c] = this.match(this.root, input1, input2);
-        return a / (a+b+c);
-    }
-
-    public compareAll() {
-        for (let i = 0; i < this.texts.length; i++) {
-            for (let j = i+1; j < this.texts.length; j++) {
-                this.compare(i, j);
-            }
-        }
     }
 
     /**

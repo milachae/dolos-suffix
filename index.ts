@@ -4,6 +4,7 @@ import {readDir} from "./src/lib/reader.js";
 import Parser from "tree-sitter";
 // import t from "tree-sitter-typescript";
 import Python from "tree-sitter-python";
+import {generateRandomStrings} from "./src/test/_util.js";
 
 function runPluto() {
    const parser = new Parser();
@@ -16,14 +17,14 @@ function runPluto() {
    const suffixTree = new SuffixTree(codes);
    console.timeEnd("pluto");
 
-   console.timeEnd("lcs");
+   console.time("lcs");
    const a = suffixTree.allLongestCommonSubstrings();
    console.timeEnd("lcs");
 }
 
 function main(): void {
-   const s = new SuffixTree([[7,8,9,10,11,12], [1,2,3, 4,5,6]]);
-   console.log(s.compare(0,1))
+
+   runPluto();
 }
 
 main();
