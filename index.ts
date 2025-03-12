@@ -10,8 +10,8 @@ function runPluto() {
    const parser = new Parser();
    parser.setLanguage(Python);
 
-   const texts = readDir("../dolos-benchmark/datasets/plutokiller");
-   const codes = texts.map(t => textToNumbers(parser, t));
+   const [files, content] = readDir("../dolos-benchmark/datasets/plutokiller");
+   const codes = content.map(t => textToNumbers(parser, t));
 
    console.time("pluto");
    const suffixTree = new SuffixTree(codes);
