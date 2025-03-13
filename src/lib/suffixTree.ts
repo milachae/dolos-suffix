@@ -1,6 +1,11 @@
 import {SuffixTreeNode} from "./suffixTreeNode.js";
 import {arrayStartsWith, assert, iType} from "./utils.js";
 
+interface maximalPair {
+    start1: number,
+    start2: number,
+    length: number,
+}
 
 export class SuffixTree {
 
@@ -266,6 +271,34 @@ export class SuffixTree {
         const results = Array.from({ length: this.texts.length }, () => Array(this.texts.length).fill(0));
         this.allLongestCommonSubstringsRecursive(this.root, 0, results);
         return results;
+    }
+
+    private maximalPairsRecursive(node: SuffixTreeNode, pairs: maximalPair[]): Map<number, number[]> {
+
+        let leftMap: Map<number, number[]> = new Map();
+
+        if (node.isLeaf()) {
+            let leftChar = node.start === 0 ? -1 : this.texts[node.input][node.start-1];
+            assert(typeof leftChar === 'number');
+
+            leftMap.set(leftChar, [node.start]);
+        } else {
+            for (const child of node.children.values()) {
+                for (let [key, value] of this.maximalPairsRecursive(child, pairs)) {
+                    leftMap.set(key, [...(leftMap.get(key) || []), ...value]);
+                }
+            }
+        }
+
+        // calculate all pairs
+        return leftMap;
+    }
+
+    /**
+     *
+     */
+    public maximalPairs() {
+        this.maximalPairsRecursive(this.root, []);
     }
 
     /**
