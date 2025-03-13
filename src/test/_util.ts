@@ -71,7 +71,7 @@ export function generateRandomStrings(amount: number, string_length: number = 10
 }
 
 // https://www.geeksforgeeks.org/longest-common-substring-dp-29/
-export function getLcsLengthDyn(s1: number[], s2: number[]): number {
+export function longestCommonSubstringLengthDyn(s1: number[], s2: number[]): number {
     const m = s1.length;
     const n = s2.length;
 

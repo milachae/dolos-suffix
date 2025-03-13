@@ -2,9 +2,7 @@ import {textToNumbers} from "./src/lib/codeToNumbers.js";
 import {SuffixTree} from "./src/lib/suffixTree.js";
 import {readDir} from "./src/lib/reader.js";
 import Parser from "tree-sitter";
-// import t from "tree-sitter-typescript";
 import Python from "tree-sitter-python";
-import {generateRandomStrings} from "./src/test/_util.js";
 
 function runPluto() {
    const parser = new Parser();
