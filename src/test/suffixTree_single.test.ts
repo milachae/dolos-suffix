@@ -16,9 +16,9 @@ test("Construct suffix tree with one character", t => {
     t.true(tree.root.children.get(1)!.start === 0);
     t.true(tree.root.children.get(1)!.end.value === 2);
 
-    t.true(tree.root.children.has("$"));
-    t.true(tree.root.children.get("$")!.start === 1);
-    t.true(tree.root.children.get("$")!.end.value === 2);
+    t.true(tree.root.children.has(0));
+    t.true(tree.root.children.get(0)!.start === 1);
+    t.true(tree.root.children.get(0)!.end.value === 2);
 })
 
 test("Construct suffix tree with different character", t => {
@@ -34,7 +34,7 @@ test("Construct suffix tree with different character", t => {
     t.true(tree.root.children.has(1));
     t.true(tree.root.children.has(2));
     t.true(tree.root.children.has(3));
-    t.true(tree.root.children.has("$"));
+    t.true(tree.root.children.has(0));
 
     t.true(tree.root.children.get(1)!.start === 0);
     t.true(tree.root.children.get(1)!.end.value === 4);
@@ -45,8 +45,8 @@ test("Construct suffix tree with different character", t => {
     t.true(tree.root.children.get(3)!.start === 2);
     t.true(tree.root.children.get(3)!.end.value === 4);
 
-    t.true(tree.root.children.get("$")!.start === 3);
-    t.true(tree.root.children.get("$")!.end.value === 4);
+    t.true(tree.root.children.get(0)!.start === 3);
+    t.true(tree.root.children.get(0)!.end.value === 4);
 })
 
 test("Construct suffix tree with multiples of one character", t => {
@@ -73,13 +73,13 @@ test("Construct suffix tree with multiples of one character", t => {
     t.true(tree.root.children.get(1)!.children.get(1)!.end.value === 3);
 
 
-    t.true(tree.root.children.get(1)!.children.get("$")!.children.size === 0);
-    t.true(tree.root.children.get(1)!.children.get("$")!.start === 2);
-    t.true(tree.root.children.get(1)!.children.get("$")!.end.value === 3);
+    t.true(tree.root.children.get(1)!.children.get(0)!.children.size === 0);
+    t.true(tree.root.children.get(1)!.children.get(0)!.start === 2);
+    t.true(tree.root.children.get(1)!.children.get(0)!.end.value === 3);
 
-    t.true(tree.root.children.has("$"));
-    t.true(tree.root.children.get("$")!.start === 2);
-    t.true(tree.root.children.get("$")!.end.value === 3);
+    t.true(tree.root.children.has(0));
+    t.true(tree.root.children.get(0)!.start === 2);
+    t.true(tree.root.children.get(0)!.end.value === 3);
 })
 
 test("Construct suffix tree with a repeating character", t => {
@@ -106,17 +106,17 @@ test("Construct suffix tree with a repeating character", t => {
     t.true(tree.root.children.get(1)!.children.get(2)!.end.value === 4);
 
 
-    t.true(tree.root.children.get(1)!.children.get("$")!.children.size === 0);
-    t.true(tree.root.children.get(1)!.children.get("$")!.start === 3);
-    t.true(tree.root.children.get(1)!.children.get("$")!.end.value === 4);
+    t.true(tree.root.children.get(1)!.children.get(0)!.children.size === 0);
+    t.true(tree.root.children.get(1)!.children.get(0)!.start === 3);
+    t.true(tree.root.children.get(1)!.children.get(0)!.end.value === 4);
 
     t.true(tree.root.children.has(2));
     t.true(tree.root.children.get(2)!.start === 1);
     t.true(tree.root.children.get(2)!.end.value === 4);
 
-    t.true(tree.root.children.has("$"));
-    t.true(tree.root.children.get("$")!.start === 3);
-    t.true(tree.root.children.get("$")!.end.value === 4);
+    t.true(tree.root.children.has(0));
+    t.true(tree.root.children.get(0)!.start === 3);
+    t.true(tree.root.children.get(0)!.end.value === 4);
 })
 
 test("Construct suffix tree of abcabxabcd and find every substring and suffix", t => {

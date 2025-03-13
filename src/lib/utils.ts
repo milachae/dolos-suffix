@@ -1,5 +1,3 @@
-export type iType = (number | "$");
-
 export function assert(condition: boolean, message?: string): asserts condition {
     if (!condition) {
         throw new Error(message || "Assertion failed");
@@ -12,7 +10,7 @@ export function assert(condition: boolean, message?: string): asserts condition 
  * @param a2
  * @private
  */
-export function arrayStartsWith(a1: iType[], a2: iType[]): boolean {
+export function arrayStartsWith(a1: number[], a2: number[]): boolean {
     for (let i = 0; i < a2.length; i++) {
         if (a1[i] !== a2[i]) {
             return false;
@@ -20,4 +18,8 @@ export function arrayStartsWith(a1: iType[], a2: iType[]): boolean {
     }
 
     return true;
+}
+
+export function onlyPositiveNumbers(sequence: number[]): boolean {
+    return sequence.every(n => n > 0);
 }

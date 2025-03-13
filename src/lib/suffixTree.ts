@@ -1,12 +1,15 @@
 import {SuffixTreeNode} from "./suffixTreeNode.js";
-import {arrayStartsWith, assert, iType} from "./utils.js";
+import {arrayStartsWith, assert, onlyPositiveNumbers} from "./utils.js";
 
 
+/**
+ *
+ */
 export class SuffixTree {
 
     public root: SuffixTreeNode = new SuffixTreeNode(0, {value: 0}, 0);
 
-    private readonly texts:iType[][] = [];
+    private readonly texts:number[][] = [];
 
     // Variables needed during the building phase
     private end: { value: number } = { value: 0 };
@@ -14,10 +17,13 @@ export class SuffixTree {
     private activeNode: SuffixTreeNode = this.root;
     private activeEdgeIndex: number = 0;
     private activeLength: number = 0;
-    private activeEdge: iType = 0;
+    private activeEdge: number = 0;
 
     constructor(texts: number[][]) {
-        texts.forEach((text) => this.texts.push([...text, "$"]));
+        texts.forEach((text) => {
+            assert(onlyPositiveNumbers(text),"This suffix tree only accept strict positive numbers");
+            this.texts.push([...text, 0]);
+        });
         this.root.suffixLink = this.root;
         this.resetBuildVariables(0);
         this.build();
@@ -272,7 +278,7 @@ export class SuffixTree {
      *
      * @param text
      */
-    public hasSubstring(text: iType[]): boolean {
+    public hasSubstring(text: number[]): boolean {
 
         let index = 0;
         let notInTree = false;
@@ -301,8 +307,8 @@ export class SuffixTree {
      *
      * @param text
      */
-    public hasSuffix(text: iType[]): boolean {
-        return this.hasSubstring(text.concat(["$"]));
+    public hasSuffix(text: number[]): boolean {
+        return this.hasSubstring(text.concat([0]));
     }
 
     /**
