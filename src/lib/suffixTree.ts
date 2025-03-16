@@ -273,6 +273,40 @@ export class SuffixTree {
         return results;
     }
 
+    /**
+     * All of the positions of the first array are paired with the positions for the second array for te given length.
+     * @param length
+     * @param startPositions1
+     * @param startPositions2
+     * @param pairs
+     * @private
+     */
+    private addPairs(length: number, startPositions1: number[], startPositions2: number[], pairs: MaximalPair[]) {
+        for (let sp1 of startPositions1) {
+            for (let sp2 of startPositions2) {
+                pairs.push({start1: sp1, start2: sp2, length: length});
+            }
+        }
+    }
+
+    /**
+     * Calculate the union of all the values of the maps that are not equal to the given key.
+     * @param arrayMaps
+     * @param k
+     * @private
+     */
+    private unionValues(arrayMaps: Map<number, number[]>[], k:number) {
+        let union = [];
+        for (const map of arrayMaps) {
+            for(const [key, value] of map) {
+                if (key !== k ) {
+                    union.push(...value);
+                }
+            }
+        }
+        return union;
+    }
+
     private maximalPairsRecursive(node: SuffixTreeNode, depth: number, pairs: MaximalPair[]): Map<number, number[]> {
 
         let leftMap: Map<number, number[]> = new Map();
@@ -284,44 +318,29 @@ export class SuffixTree {
             return leftMap.set(leftChar, [node.start - depth]);
         }
 
-        let maps: Map<number, number[]>[] = [];
+        let childrenMaps: Map<number, number[]>[] = [];
 
         // retrieve all the child maps
         for (const child of node.children.values()) {
-            maps.push(this.maximalPairsRecursive(child, depth + node.length(), pairs));
+            childrenMaps.push(this.maximalPairsRecursive(child, depth + node.length(), pairs));
         }
 
-        // calculate the maximal pairs
+        // calculate the maximal pairs only for pairs longer than 0
         if (depth + node.length() > 0) {
-            for (const [i, map] of maps.entries()) {
-                for (const [left, startPositions] of map) {
-                    let union: number[] = [];
-                    for (const map1 of maps.slice(i, maps.length)) {
-                        if (map !== map1) {
-                            for(const [left1, startPositions1] of map1) {
-                                if (left1 !== left ) {
-                                    union.push(...startPositions1);
-                                }
-                            }
-                        }
-                    }
-                    for (let option of startPositions) {
-                        for (let option1 of union) {
-                            pairs.push({start1: option, start2: option1, length: depth + node.length()});
-                        }
-                    }
+            for (const [i, map] of childrenMaps.entries()) {
+                for (const [leftChar, startPisitions] of map) {
+                    let union: number[] = this.unionValues(childrenMaps.slice(i+1, childrenMaps.length), leftChar);
+                    this.addPairs(depth, startPisitions, union, pairs);
                 }
             }
         }
 
-
         // create the map of the current node
-        for (let childMap of maps){
+        for (let childMap of childrenMaps){
             for (let [key, value] of childMap) {
                 leftMap.set(key, [...(leftMap.get(key) || []), ...value]);
             }
         }
-
 
         // calculate all pairs
         return leftMap;
