@@ -18,6 +18,10 @@ function runPluto() {
    console.time("lcs");
    const a = suffixTree.allLongestCommonSubstrings();
    console.timeEnd("lcs");
+
+   console.time("pairs");
+   const pairs = suffixTree.maximalPairs();
+   console.timeEnd("pairs");
 }
 
 function main(): void {

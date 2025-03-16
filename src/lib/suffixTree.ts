@@ -1,7 +1,7 @@
 import {SuffixTreeNode} from "./suffixTreeNode.js";
 import {arrayStartsWith, assert, iType} from "./utils.js";
 
-interface maximalPair {
+export interface MaximalPair {
     start1: number,
     start2: number,
     length: number,
@@ -273,22 +273,55 @@ export class SuffixTree {
         return results;
     }
 
-    private maximalPairsRecursive(node: SuffixTreeNode, pairs: maximalPair[]): Map<number, number[]> {
+    private maximalPairsRecursive(node: SuffixTreeNode, depth: number, pairs: MaximalPair[]): Map<number, number[]> {
 
         let leftMap: Map<number, number[]> = new Map();
 
         if (node.isLeaf()) {
-            let leftChar = node.start === 0 ? -1 : this.texts[node.input][node.start-1];
+            let leftChar = node.start - depth === 0 ? -1 : this.texts[node.input][node.start - 1 - depth];
             assert(typeof leftChar === 'number');
 
-            leftMap.set(leftChar, [node.start]);
-        } else {
-            for (const child of node.children.values()) {
-                for (let [key, value] of this.maximalPairsRecursive(child, pairs)) {
-                    leftMap.set(key, [...(leftMap.get(key) || []), ...value]);
+            return leftMap.set(leftChar, [node.start - depth]);
+        }
+
+        let maps: Map<number, number[]>[] = [];
+
+        // retrieve all the child maps
+        for (const child of node.children.values()) {
+            maps.push(this.maximalPairsRecursive(child, depth + node.length(), pairs));
+        }
+
+        // calculate the maximal pairs
+        if (depth + node.length() > 0) {
+            for (const [i, map] of maps.entries()) {
+                for (const [left, startPositions] of map) {
+                    let union: number[] = [];
+                    for (const map1 of maps.slice(i, maps.length)) {
+                        if (map !== map1) {
+                            for(const [left1, startPositions1] of map1) {
+                                if (left1 !== left ) {
+                                    union.push(...startPositions1);
+                                }
+                            }
+                        }
+                    }
+                    for (let option of startPositions) {
+                        for (let option1 of union) {
+                            pairs.push({start1: option, start2: option1, length: depth + node.length()});
+                        }
+                    }
                 }
             }
         }
+
+
+        // create the map of the current node
+        for (let childMap of maps){
+            for (let [key, value] of childMap) {
+                leftMap.set(key, [...(leftMap.get(key) || []), ...value]);
+            }
+        }
+
 
         // calculate all pairs
         return leftMap;
@@ -297,8 +330,10 @@ export class SuffixTree {
     /**
      *
      */
-    public maximalPairs() {
-        this.maximalPairsRecursive(this.root, []);
+    public maximalPairs(): MaximalPair[] {
+        let maximalPairs: MaximalPair[] = [];
+        this.maximalPairsRecursive(this.root, 0, maximalPairs);
+        return maximalPairs;
     }
 
     /**
