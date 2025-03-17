@@ -1,28 +1,49 @@
 import {SuffixTreeNode} from "./suffixTreeNode.js";
 import {arrayStartsWith, assert, onlyPositiveNumbers} from "./utils.js";
 
+class ActivePos {
+    private readonly startNode: SuffixTreeNode;
+
+    constructor(
+        public node: SuffixTreeNode,
+        public length: number,
+        public edge: number,
+        public edgeIndex: number
+    ) {
+        this.startNode = node;
+    }
+
+    public reset(activeEdge: number) {
+        this.length = 0;
+        this.edge = 0;
+        this.node = this.startNode;
+        this.edge = activeEdge;
+        this.edgeIndex = 0;
+    }
+
+    public getActiveEdgeNode() {
+        return this.node.children.get(this.edge);
+    }
+}
 
 /**
- *
+ * A suffix tree that only accepts number greater or equal than 1.
  */
 export class SuffixTree {
 
     public root: SuffixTreeNode = new SuffixTreeNode(0, {value: 0}, 0);
 
-    private readonly texts:number[][] = [];
+    private readonly seqs:number[][] = [];
 
     // Variables needed during the building phase
     private end: { value: number } = { value: 0 };
     private remainingSuffixCount: number = 0;
-    private activeNode: SuffixTreeNode = this.root;
-    private activeEdgeIndex: number = 0;
-    private activeLength: number = 0;
-    private activeEdge: number = 0;
+    private activePos: ActivePos = new ActivePos(this.root, 0, 0, 0);
 
-    constructor(texts: number[][]) {
-        texts.forEach((text) => {
-            assert(onlyPositiveNumbers(text),"This suffix tree only accept strict positive numbers");
-            this.texts.push([...text, 0]);
+    constructor(sequence: number[][]) {
+        sequence.forEach((sequence) => {
+            assert(onlyPositiveNumbers(sequence),"This suffix tree only accept strict positive numbers");
+            this.seqs.push([...sequence, 0]);
         });
         this.root.suffixLink = this.root;
         this.resetBuildVariables(0);
@@ -35,12 +56,9 @@ export class SuffixTree {
      * @private
      */
     private resetBuildVariables(i: number) {
-        assert(i < this.texts.length);
+        assert(i < this.seqs.length && i > 0);
         this.end = {value: 0};
-        this.activeNode = this.root;
-        this.activeLength = 0;
-        this.activeEdge = this.texts[i][0];
-        this.activeEdgeIndex = 0;
+        this.activePos.reset( this.seqs[i][0]);
         this.remainingSuffixCount = 0;
     }
 
@@ -50,26 +68,15 @@ export class SuffixTree {
      * @private
      */
     private walkDown(input: number) {
-        let node_activeEdge = this.activeNode.children.get(this.activeEdge)!;
-        while (node_activeEdge !== undefined && this.activeLength >= node_activeEdge.length()) {
-            this.activeNode = node_activeEdge;
-            this.activeEdgeIndex += this.activeNode.length();
-            this.activeEdge = this.texts[input][this.activeEdgeIndex];
-            this.activeLength -= this.activeNode.length();
-            node_activeEdge = this.activeNode.children.get(this.activeEdge)!;
+        let node_activeEdge = this.activePos.getActiveEdgeNode();
+
+        while (node_activeEdge !== undefined && this.activePos.length >= node_activeEdge.length()) {
+            this.activePos.node = node_activeEdge;
+            this.activePos.edgeIndex += this.activePos.node.length();
+            this.activePos.edge = this.seqs[input][this.activePos.edgeIndex];
+            this.activePos.length -= this.activePos.node.length();
+            node_activeEdge = this.activePos.getActiveEdgeNode();
         }
-    }
-
-    private splitEdge() {
-
-    }
-
-    private addLeaf() {
-
-    }
-
-    private followSuffixLink() {
-
     }
 
     /**
@@ -99,11 +106,10 @@ export class SuffixTree {
                 is s[i+1] (already in tree), do nothing.
          */
 
-
         this.end.value++; // RULE 1
         this.remainingSuffixCount++;
         let foundStopCondition = false;
-        const new_number = this.texts[input][phase];
+        const new_number = this.seqs[input][phase];
         let prev_node: SuffixTreeNode|undefined;
 
         // Iterate until all suffixes are added or Rule 3 has been triggered
@@ -111,20 +117,20 @@ export class SuffixTree {
 
             // APCFALZ (activeNode change for Active Length ZERO)
             // no walk down is needed here (as activeLength is ZERO), so the next character we look for is current character being processed.
-            if (this.activeLength === 0) {
-                this.activeEdge = new_number;
-                this.activeEdgeIndex = phase;
+            if (this.activePos.length === 0) {
+                this.activePos.edge = new_number;
+                this.activePos.edgeIndex = phase;
             }
 
             // walk down the active node
             this.walkDown(input); // APCFWD
 
             // Check if there is an edge for the activeEdge
-            let node_activeEdge = this.activeNode.children.get(this.activeEdge);
+            let node_activeEdge = this.activePos.getActiveEdgeNode();
             if (node_activeEdge !== undefined) {
 
-                let index_next_number = node_activeEdge.start + this.activeLength;
-                if (this.texts[node_activeEdge.input][index_next_number] === new_number) {
+                let index_next_number = node_activeEdge.start + this.activePos.length;
+                if (this.seqs[node_activeEdge.input][index_next_number] === new_number) {
                     // RULE 3, next char is already in the suffix tree
                     // When rule 3 applies in any phase i, then before we move on to next phase i+1,
                     // we increment activeLength by 1.
@@ -134,17 +140,17 @@ export class SuffixTree {
                     }
 
                     if (prev_node !== undefined) {
-                        prev_node.suffixLink = this.activeNode;
+                        prev_node.suffixLink = this.activePos.node;
                         prev_node = undefined;
                     }
 
                     if (!end) {
-                        this.activeLength++; // APCFER3
+                        this.activePos.length++; // APCFER3
                         foundStopCondition = true;
                     }
 
                 } else {
-                    // RULE
+                    // RULE (Split edge)
                     let leaf_node = new SuffixTreeNode(phase,this.end, input);
                     let internal_node = new SuffixTreeNode(node_activeEdge.start, {value: index_next_number}, node_activeEdge.input);
 
@@ -154,16 +160,16 @@ export class SuffixTree {
                     prev_node = internal_node;
 
                     internal_node.children.set(new_number, leaf_node);
-                    node_activeEdge.start += this.activeLength;
-                    internal_node.children.set(this.texts[node_activeEdge.input][node_activeEdge.start], node_activeEdge);
-                    this.activeNode.children.set(this.activeEdge, internal_node);
+                    node_activeEdge.start += this.activePos.length;
+                    internal_node.children.set(this.seqs[node_activeEdge.input][node_activeEdge.start], node_activeEdge);
+                    this.activePos.node.children.set(this.activePos.edge, internal_node);
                 }
 
             } else {
                 // RULE 2
-                this.activeNode.children.set(this.activeEdge, new SuffixTreeNode(phase, this.end, input));
+                this.activePos.node.children.set(this.activePos.edge, new SuffixTreeNode(phase, this.end, input));
                 if (prev_node !== undefined) {
-                    prev_node.suffixLink = this.activeNode;
+                    prev_node.suffixLink = this.activePos.node;
                     prev_node = undefined;
                 }
             }
@@ -172,14 +178,14 @@ export class SuffixTree {
                 // update activeNode
                 this.remainingSuffixCount--; // leaf created
 
-                if (this.activeNode === this.root && this.activeLength > 0) { // APCFER2C1
-                    this.activeLength--;
-                    this.activeEdgeIndex = phase - this.remainingSuffixCount + 1;
-                    this.activeEdge = this.texts[input][this.activeEdgeIndex];
+                if (this.activePos.node === this.root && this.activePos.length > 0) { // APCFER2C1
+                    this.activePos.length--;
+                    this.activePos.edgeIndex = phase - this.remainingSuffixCount + 1;
+                    this.activePos.edge = this.seqs[input][this.activePos.edgeIndex];
 
-                } else if (this.activeNode !== this.root) { // APCFER2C2
-                    assert(this.activeNode.suffixLink !== undefined); // Sanity check
-                    this.activeNode = this.activeNode.suffixLink;
+                } else if (this.activePos.node !== this.root) { // APCFER2C2
+                    assert(this.activePos.node.suffixLink !== undefined); // Sanity check
+                    this.activePos.node = this.activePos.node.suffixLink;
                 }
             }
         }
@@ -203,12 +209,12 @@ export class SuffixTree {
      * @private
      */
     private build() {
-        for (let input = 0; input < this.texts.length; input++) {
+        for (let input = 0; input < this.seqs.length; input++) {
             //TODO: start from the suffix that is not in the tree
             this.resetBuildVariables(input);
 
-            for (let phase = 0; phase <  this.texts[input].length; phase++) {
-                this.extend(input, phase, phase === this.texts[input].length-1);
+            for (let phase = 0; phase <  this.seqs[input].length; phase++) {
+                this.extend(input, phase, phase === this.seqs[input].length-1);
             }
         }
 
@@ -241,7 +247,7 @@ export class SuffixTree {
      * @param input2 The index of the second input
      */
     public longestCommonSubstring(input1: number, input2: number): number {
-        console.assert(input1 < this.texts.length && input2 < this.texts.length);
+        console.assert(input1 < this.seqs.length && input2 < this.seqs.length);
         return this.longestCommonSubsequenceRecursive(input1, input2, this.root);
     }
 
@@ -269,29 +275,29 @@ export class SuffixTree {
      * Calculate all the longest common substrings between all pairs of inputs.
      */
     public allLongestCommonSubstrings(): number[][] {
-        const results = Array.from({ length: this.texts.length }, () => Array(this.texts.length).fill(0));
+        const results = Array.from({ length: this.seqs.length }, () => Array(this.seqs.length).fill(0));
         this.allLongestCommonSubstringsRecursive(this.root, 0, results);
         return results;
     }
 
     /**
      *
-     * @param text
+     * @param sequence
      */
-    public hasSubstring(text: number[]): boolean {
+    public hasSubstring(sequence: number[]): boolean {
 
         let index = 0;
         let notInTree = false;
         let currentNode: SuffixTreeNode = this.root;
 
-        while(index < text.length && !notInTree) {
-            if (currentNode.children.has(text[index])) {
-                currentNode = currentNode.children.get(text[index])! // safe because checked in if;
+        while(index < sequence.length && !notInTree) {
+            if (currentNode.children.has(sequence[index])) {
+                currentNode = currentNode.children.get(sequence[index])! // safe because checked in if;
                 let length = currentNode.end.value - currentNode.start;
 
-                const edgeString = this.texts[currentNode.input].slice(currentNode.start, currentNode.end.value);
-                const textString = text.slice(index, index+length)
-                if (!arrayStartsWith(edgeString,textString)) {
+                const edge = this.seqs[currentNode.input].slice(currentNode.start, currentNode.end.value);
+                const seqSlice = sequence.slice(index, index+length)
+                if (!arrayStartsWith(edge,seqSlice)) {
                     notInTree = true;
                 }
 
@@ -305,10 +311,10 @@ export class SuffixTree {
 
     /**
      *
-     * @param text
+     * @param sequence
      */
-    public hasSuffix(text: number[]): boolean {
-        return this.hasSubstring(text.concat([0]));
+    public hasSuffix(sequence: number[]): boolean {
+        return this.hasSubstring(sequence.concat([0]));
     }
 
     /**
@@ -320,9 +326,10 @@ export class SuffixTree {
     private printRecursive(node: SuffixTreeNode, depth: number) {
         const spacing = "    ".repeat(depth);
         const start_stop = `(${node.start}, ${node.end.value})`
-        const substring = this.texts[node.input].slice(node.start, node.end.value);
+        const substring = this.seqs[node.input].slice(node.start, node.end.value);
         const suffixlink = node.suffixLink !== undefined ? `-> ${node.suffixLink.id}` : ``;
         const inputs =  node.inputs.join(",")
+
         if (depth !== 0) {
             console.log(`${spacing}N-${node.id}  ${start_stop}: ${substring} ${suffixlink} [${inputs}]`);
         } else {
@@ -333,7 +340,7 @@ export class SuffixTree {
     }
 
     /**
-     *
+     * Print the suffix tree
      */
     public print() {
         this.printRecursive(this.root, 0);
