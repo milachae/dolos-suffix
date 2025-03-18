@@ -221,13 +221,7 @@ export class SuffixTree {
         this.propagateInputs(this.root);
     }
 
-    /**
-     *
-     * @param input1
-     * @param input2
-     * @param node
-     * @private
-     */
+
     private longestCommonSubsequenceRecursive(input1: number, input2: number, node: SuffixTreeNode): number {
         if (node.inputs.includes(input1) && node.inputs.includes(input2)) {
 
@@ -281,7 +275,7 @@ export class SuffixTree {
     }
 
     /**
-     *
+     * Checks if the suffix tree contains a given sequence.
      * @param sequence
      */
     public hasSubstring(sequence: number[]): boolean {
