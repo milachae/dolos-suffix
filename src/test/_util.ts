@@ -4,7 +4,7 @@ import {ExecutionContext} from "ava";
 export function stringToNumbers(str: string): number[] {
     let result: number[] = [];
     for (const character of str) {
-        result.push(character.toLowerCase().charCodeAt(0));
+        result.push(character.toLowerCase().charCodeAt(0)+1);
     }
 
     return result
@@ -55,7 +55,7 @@ export function generateRandomString(string_length: number = 100, alphabet_size:
     let text: number[] = [];
 
     for (let i = 0; i < string_length; i++) {
-        text.push(Math.floor(Math.random() * alphabet_size));
+        text.push(Math.ceil(Math.random() * alphabet_size));
     }
 
     return text;

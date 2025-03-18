@@ -1,5 +1,3 @@
-import {iType} from "./utils.js";
-
 let ID: number = 0;
 
 /**
@@ -7,7 +5,7 @@ let ID: number = 0;
  */
 export class SuffixTreeNode {
 
-    public children: Map<iType, SuffixTreeNode> = new Map<iType, SuffixTreeNode>();
+    public children: Map<number, SuffixTreeNode> = new Map<number, SuffixTreeNode>();
     public suffixLink: SuffixTreeNode | undefined;
     public id: number = 0;
     public leaf: boolean = false;
@@ -44,4 +42,5 @@ export class SuffixTreeNode {
             }
         }
     }
+
 }

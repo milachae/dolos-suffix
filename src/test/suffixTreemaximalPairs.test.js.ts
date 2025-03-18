@@ -2,7 +2,7 @@ import test from "ava";
 import {SuffixTree, MaximalPair} from "../lib/suffixTree.js";
 import {generateRandomString, stringToNumbers} from "./_util.js";
 
-test.only("Should find the maximal pairs in one sequence", t => {
+test("Should find the maximal pairs in one sequence", t => {
     const input = [[5 ,1, 2, 3, 6, 1, 2, 3, 7]]
     const suffixTree = new SuffixTree(input)
     const actual = suffixTree.maximalPairs()

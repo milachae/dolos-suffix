@@ -39,8 +39,8 @@ test("Should handle this random test", t => {
 
 test("small failing case", t => {
     const inputs = [
-        [1,2,3],
-        [0,1,2,3]
+        [2,3,4],
+        [1,2,3,4]
     ];
     const tree: SuffixTree = new SuffixTree(inputs);
 
