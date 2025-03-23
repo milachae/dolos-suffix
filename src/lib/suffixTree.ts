@@ -2,10 +2,16 @@ import {SuffixTreeNode} from "./suffixTreeNode.js";
 import {arrayStartsWith, assert, onlyPositiveNumbers} from "./utils.js";
 
 export interface MaximalPair {
-    start1: number,
-    start2: number,
+    starts: [StartPosition, StartPosition],
     length: number,
 }
+
+export interface StartPosition {
+    start: number,
+    input: number
+}
+
+
 class ActivePos {
     private readonly startNode: SuffixTreeNode;
 
@@ -55,11 +61,10 @@ export class SuffixTree {
         this.build();
     }
 
-    /**
-     *
-     * @param i
-     * @private
-     */
+    ///////////////////////////////////////////////
+    //////////////////// BUILD ////////////////////
+    ///////////////////////////////////////////////
+
     private resetBuildVariables(i: number) {
         assert(i < this.seqs.length && i >= 0);
         this.end = {value: 0};
@@ -226,6 +231,9 @@ export class SuffixTree {
         this.propagateInputs(this.root);
     }
 
+    ///////////////////////////////////////////////
+    ////////// Longest common substring ///////////
+    ///////////////////////////////////////////////
 
     private longestCommonSubsequenceRecursive(input1: number, input2: number, node: SuffixTreeNode): number {
         if (node.inputs.includes(input1) && node.inputs.includes(input2)) {
@@ -279,8 +287,12 @@ export class SuffixTree {
         return results;
     }
 
+
+    ///////////////////////////////////////////////
+    //////////////// Maximal pairs ////////////////
+    ///////////////////////////////////////////////
+
     /**
-<<<<<<< HEAD
      * All of the positions of the first array are paired with the positions for the second array for te given length.
      * @param length
      * @param startPositions1
@@ -288,10 +300,12 @@ export class SuffixTree {
      * @param pairs
      * @private
      */
-    private addPairs(length: number, startPositions1: number[], startPositions2: number[], pairs: MaximalPair[]) {
+    private addPairs(length: number, startPositions1: StartPosition[], startPositions2: StartPosition[], pairs: MaximalPair[]) {
         for (let sp1 of startPositions1) {
             for (let sp2 of startPositions2) {
-                pairs.push({start1: sp1, start2: sp2, length: length});
+                if (sp1.input !== sp2.input) {
+                    pairs.push({starts: [sp1, sp2], length: length});
+                }
             }
         }
     }
@@ -302,11 +316,11 @@ export class SuffixTree {
      * @param k
      * @private
      */
-    private unionValues(arrayMaps: Map<number, number[]>[], k:number) {
+    private unionValues(arrayMaps: Map<number, StartPosition[]>[], k:number): StartPosition[] {
         let union = [];
         for (const map of arrayMaps) {
             for(const [key, value] of map) {
-                if (key !== k ) {
+                if (key !== k || key === -1) { // Strings that start with the same sequence also are a pair but have the same left value
                     union.push(...value);
                 }
             }
@@ -314,31 +328,40 @@ export class SuffixTree {
         return union;
     }
 
-    private maximalPairsRecursive(node: SuffixTreeNode, depth: number, pairs: MaximalPair[]): Map<number, number[]> {
+    private maximalPairsRecursive(node: SuffixTreeNode, depth: number, pairs: MaximalPair[]): Map<number, StartPosition[]> {
 
-        let leftMap: Map<number, number[]> = new Map();
+        let childrenMaps: Map<number, StartPosition[]>[] = [];
+        const newDepth = depth + node.length() + (node.isLeaf() ? -1 : 0) // don't include the end character in the length of the match
 
         if (node.isLeaf()) {
-            let leftChar = node.start - depth === 0 ? -1 : this.seqs[node.input][node.start - 1 - depth];
-            return leftMap.set(leftChar, [node.start - depth]);
-        }
+            for (const input of node.inputs) {
+                let leftMap: Map<number, StartPosition[]> = new Map();
 
-        let childrenMaps: Map<number, number[]>[] = [];
+                const startIndex = this.seqs[input].length - depth - node.length();
+                let leftChar = startIndex === 0 ? -1 : this.seqs[input][startIndex - 1];
+                leftMap.set(leftChar, [...(leftMap.get(leftChar) || []), {start: startIndex, input: input}]);
 
-        // retrieve all the child maps
-        for (const child of node.children.values()) {
-            childrenMaps.push(this.maximalPairsRecursive(child, depth + node.length(), pairs));
+                childrenMaps.push(leftMap);
+            }
+
+        } else {
+            // retrieve all the child maps
+            for (const child of node.children.values()) {
+                childrenMaps.push(this.maximalPairsRecursive(child, newDepth, pairs));
+            }
         }
 
         // calculate the maximal pairs only for pairs longer than 0
-        if (depth + node.length() > 0) {
+        if (newDepth > 0) {
             for (const [i, map] of childrenMaps.entries()) {
-                for (const [leftChar, startPisitions] of map) {
-                    let union: number[] = this.unionValues(childrenMaps.slice(i+1, childrenMaps.length), leftChar);
-                    this.addPairs(depth + node.length(), startPisitions, union, pairs);
+                for (const [leftChar, startPositions] of map) {
+                    let union: StartPosition[] = this.unionValues(childrenMaps.slice(i+1, childrenMaps.length), leftChar);
+                    this.addPairs(newDepth, startPositions, union, pairs);
                 }
             }
         }
+
+        let leftMap: Map<number, StartPosition[]> = new Map();
 
         // create the map of the current node
         for (let childMap of childrenMaps){
@@ -360,13 +383,16 @@ export class SuffixTree {
         return maximalPairs;
     }
 
+
+    ///////////////////////////////////////////////
+    /////////////////// SEARCH ////////////////////
+    ///////////////////////////////////////////////
+
     /**
      *
      * @param text
-=======
      * Checks if the suffix tree contains a given sequence.
      * @param sequence
->>>>>>> master
      */
     public hasSubstring(sequence: number[]): boolean {
 
@@ -400,6 +426,11 @@ export class SuffixTree {
     public hasSuffix(sequence: number[]): boolean {
         return this.hasSubstring(sequence.concat([0]));
     }
+
+
+    ///////////////////////////////////////////////
+    //////////////////// PRINT ////////////////////
+    ///////////////////////////////////////////////
 
     /**
      *
