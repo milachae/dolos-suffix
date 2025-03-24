@@ -12,7 +12,7 @@ function runPluto() {
    const codes = content.map(t => textToNumbers(parser, t));
 
    console.time("pluto");
-   const suffixTree = new SuffixTree(codes);
+   const suffixTree = new SuffixTree(codes, {minMaximalPairLength: 15});
    console.timeEnd("pluto");
 
    console.time("lcs");

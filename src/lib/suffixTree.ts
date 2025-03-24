@@ -1,6 +1,10 @@
 import {SuffixTreeNode} from "./suffixTreeNode.js";
 import {arrayStartsWith, assert, onlyPositiveNumbers} from "./utils.js";
 
+export interface SuffixTreeOptions {
+    minMaximalPairLength: number;
+}
+
 export interface MaximalPair {
     starts: [StartPosition, StartPosition],
     length: number,
@@ -51,7 +55,13 @@ export class SuffixTree {
     private remainingSuffixCount: number = 0;
     private activePos: ActivePos = new ActivePos(this.root, 0, 0, 0);
 
-    constructor(sequence: number[][]) {
+    private options: SuffixTreeOptions = {minMaximalPairLength: 1};
+
+    constructor(sequence: number[][], options?: SuffixTreeOptions) {
+        if (options !== undefined) {
+            this.options = options;
+        }
+
         sequence.forEach((sequence) => {
             assert(onlyPositiveNumbers(sequence),"This suffix tree only accept strict positive numbers");
             this.seqs.push([...sequence, 0]);
@@ -351,8 +361,8 @@ export class SuffixTree {
             }
         }
 
-        // calculate the maximal pairs only for pairs longer than 0
-        if (newDepth > 0) {
+        // calculate the maximal pairs only for pairs with a length longer than the allowed minimum
+        if (newDepth >= this.options.minMaximalPairLength) {
             for (const [i, map] of childrenMaps.entries()) {
                 for (const [leftChar, startPositions] of map) {
                     let union: StartPosition[] = this.unionValues(childrenMaps.slice(i+1, childrenMaps.length), leftChar);
