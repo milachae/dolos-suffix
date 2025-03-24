@@ -1,5 +1,6 @@
 import {SuffixTreeNode} from "./suffixTreeNode.js";
 import {arrayStartsWith, assert, onlyPositiveNumbers} from "./utils.js";
+import {TupleMap} from "./TupleMap.js";
 
 export interface SuffixTreeOptions {
     minMaximalPairLength: number;
@@ -16,7 +17,7 @@ export interface StartPosition {
 }
 
 
-class ActivePos {
+class ActivePosition {
     private readonly startNode: SuffixTreeNode;
 
     constructor(
@@ -53,7 +54,7 @@ export class SuffixTree {
     // Variables needed during the building phase
     private end: { value: number } = { value: 0 };
     private remainingSuffixCount: number = 0;
-    private activePos: ActivePos = new ActivePos(this.root, 0, 0, 0);
+    private activePos: ActivePosition = new ActivePosition(this.root, 0, 0, 0);
 
     private options: SuffixTreeOptions = {minMaximalPairLength: 1};
 
@@ -310,11 +311,16 @@ export class SuffixTree {
      * @param pairs
      * @private
      */
-    private addPairs(length: number, startPositions1: StartPosition[], startPositions2: StartPosition[], pairs: MaximalPair[]) {
+    private addPairs(length: number, startPositions1: StartPosition[], startPositions2: StartPosition[], pairs:  TupleMap<number, MaximalPair[]>) {
         for (let sp1 of startPositions1) {
             for (let sp2 of startPositions2) {
                 if (sp1.input !== sp2.input) {
-                    pairs.push({starts: [sp1, sp2], length: length});
+
+                    let key: [number, number] = [sp1.input, sp2.input];
+                    if (!pairs.get(key)) {
+                        pairs.set(key, [])
+                    }
+                    pairs.get(key)?.push({starts: [sp1, sp2], length: length})
                 }
             }
         }
@@ -338,7 +344,7 @@ export class SuffixTree {
         return union;
     }
 
-    private maximalPairsRecursive(node: SuffixTreeNode, depth: number, pairs: MaximalPair[]): Map<number, StartPosition[]> {
+    private maximalPairsRecursive(node: SuffixTreeNode, depth: number, pairs: TupleMap<number, MaximalPair[]>): Map<number, StartPosition[]> {
 
         let childrenMaps: Map<number, StartPosition[]>[] = [];
         const newDepth = depth + node.length() + (node.isLeaf() ? -1 : 0) // don't include the end character in the length of the match
@@ -387,8 +393,8 @@ export class SuffixTree {
     /**
      *
      */
-    public maximalPairs(): MaximalPair[] {
-        let maximalPairs: MaximalPair[] = [];
+    public maximalPairs():  TupleMap<number, MaximalPair[]> {
+        let maximalPairs: TupleMap<number, MaximalPair[]> = new TupleMap();
         this.maximalPairsRecursive(this.root, 0, maximalPairs);
         return maximalPairs;
     }
