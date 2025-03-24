@@ -16,5 +16,3 @@ function tokenizeNode(node: SyntaxNode, numbers: number[]): void{
         tokenizeNode(child, numbers);
     }
 }
-
-
