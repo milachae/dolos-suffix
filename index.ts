@@ -1,18 +1,19 @@
 import {textToNumbers} from "./src/lib/codeToNumbers.js";
 import {SuffixTree} from "./src/lib/suffixTree.js";
 import {readDir} from "./src/lib/reader.js";
-import Parser from "tree-sitter";
+import Parser, {Language} from "tree-sitter";
 import Python from "tree-sitter-python";
 
 function runPluto() {
    const parser = new Parser();
-   parser.setLanguage(Python);
+   parser.setLanguage(Python as Language);
 
-   const [files, content] = readDir("../dolos-benchmark/datasets/plutokiller");
+   const [files, content] = readDir("../dolos-cases/Valknut/files/data");
+   // const [files, content] = readDir("../dolos-benchmark/datasets/plutokiller");
    const codes = content.map(t => textToNumbers(parser, t));
 
    console.time("pluto");
-   const suffixTree = new SuffixTree(codes, {minMaximalPairLength: 8});
+   const suffixTree = new SuffixTree(codes, {minMaximalPairLength: 15});
    console.timeEnd("pluto");
 
    console.time("lcs");
@@ -28,7 +29,6 @@ function runPluto() {
          console.log(`${files[input1]} & ${files[input2]}: ${sims[input1][input2]}`);
       }
    }
-
 }
 
 function main(): void {

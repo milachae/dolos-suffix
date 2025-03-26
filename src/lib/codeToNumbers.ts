@@ -1,5 +1,4 @@
 import Parser, {SyntaxNode} from "tree-sitter";
-import Typescript from "tree-sitter-typescript";
 
 export function textToNumbers(parser: Parser, text: string): number[] {
     const tree = parser.parse(text, undefined, { bufferSize: Math.max(32 * 1024, text.length * 2) });

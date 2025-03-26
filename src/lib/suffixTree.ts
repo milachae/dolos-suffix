@@ -1,6 +1,7 @@
 import {SuffixTreeNode} from "./suffixTreeNode.js";
 import {arrayStartsWith, assert, onlyPositiveNumbers} from "./utils.js";
 import {TupleMap} from "./TupleMap.js";
+import { BitSet } from "bitset";
 
 export interface SuffixTreeOptions {
     minMaximalPairLength: number;
@@ -400,22 +401,31 @@ export class SuffixTree {
     }
 
     public similarities(): number[][] {
-        let sim: number[][] = new Array(this.seqs.length).fill(new Array(this.seqs.length).fill(0));
+        const sim = Array.from({ length: this.seqs.length }, () => Array(this.seqs.length).fill(0));
         const pairs = this.maximalPairs()
 
         for (let input1 = 0; input1 < this.seqs.length; input1++) {
             for (let input2 = input1+1; input2 < this.seqs.length; input2++) {
 
-                let overlap = 0;
+                let overlap_i1 = new BitSet();
+                let overlap_i2 = new BitSet();
                 if (pairs.has([input1, input2])) {
 
-                    for (const maximalPairs of pairs.get([input1, input2])!) {
-                        overlap += maximalPairs.length
+                    for (const maximalPair of pairs.get([input1, input2])!) {
+                        for (const start of maximalPair.starts) {
+                            if (start.input === input1) {
+                                overlap_i1.setRange(start.start,start.start+ maximalPair.length -1,1)
+                            } else {
+                                overlap_i2.setRange(start.start,start.start+ maximalPair.length-1,1)
+                            }
+                        }
                     }
                 }
 
-                sim[input1][input2] = overlap / (this.seqs[input1].length + this.seqs[input2].length);
-                sim[input2][input1] = overlap / (this.seqs[input1].length + this.seqs[input2].length);
+                let total_overlap = overlap_i1.cardinality() + overlap_i2.cardinality()
+
+                sim[input1][input2] = total_overlap / (this.seqs[input1].length + this.seqs[input2].length);
+                sim[input2][input1] = total_overlap / (this.seqs[input1].length + this.seqs[input2].length);
             }
         }
 
