@@ -1,6 +1,7 @@
 import test from "ava";
 import {generateRandomStrings, longestCommonSubstringLengthDyn, stringsToNumbers} from "./_util.js";
 import {SuffixTree} from "../lib/suffixTree.js";
+import {PairArray} from "../lib/PairArray.js";
 
 test("Should find common longest substring of 2 strings", t => {
     const inputs = stringsToNumbers([ 'CAECEABD', 'BAECEABC']);
@@ -53,13 +54,15 @@ test("Should calculate the longest common substrings all at once simple", t => {
     const inputs = stringsToNumbers(['CBAB', 'CBAA','BBBA', 'CCBA']);
     const tree: SuffixTree = new SuffixTree(inputs);
 
-    const expected: number[][] = [
-        [0,3,2,3],
-        [3,0,2,3],
-        [2,2,0,2],
-        [3,3,2,0]
-    ]
-    const result: number[][] = tree.allLongestCommonSubstrings();
+    const expected: PairArray<number> = new PairArray(4, 0);
+    expected.set(0,1,3);
+    expected.set(0,2,2);
+    expected.set(0,3,3);
+    expected.set(1,2,2);
+    expected.set(1,3,3);
+    expected.set(2,3,2);
+
+    const result = tree.allLongestCommonSubstrings();
     t.deepEqual(result, expected);
 })
 
@@ -67,15 +70,13 @@ test("Should calculate the longest common substrings all at once random", t => {
     const inputs = generateRandomStrings(10,10, 5);
     const tree: SuffixTree = new SuffixTree(inputs);
 
-    const expected: number[][] = Array.from({ length: inputs.length }, () => Array(inputs.length).fill(0));
+    const expected = new PairArray(inputs.length, 0);
     for (let i = 0; i < inputs.length; i++) {
         for (let j = i+1; j < inputs.length; j++) {
-            expected[i][j] = longestCommonSubstringLengthDyn(inputs[i], inputs[j]);
-            expected[j][i] = expected[i][j];
+            expected.set(i, j, longestCommonSubstringLengthDyn(inputs[i], inputs[j]));
         }
     }
 
-
-    const result: number[][] = tree.allLongestCommonSubstrings();
+    const result = tree.allLongestCommonSubstrings();
     t.deepEqual(result, expected);
 })

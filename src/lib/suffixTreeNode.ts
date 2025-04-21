@@ -19,6 +19,11 @@ export class SuffixTreeNode {
         this.inputs = [input];
     }
 
+    public textLength(): number {
+        // Do not include the terminal character in the actual length
+        return this.length() - (this.isLeaf() ? 1 : 0);
+    }
+
     public length(): number {
         return this.end.value - this.start
     }

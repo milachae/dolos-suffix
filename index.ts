@@ -24,9 +24,9 @@ function runPluto() {
    const sims = suffixTree.similarities();
    console.timeEnd("simularities");
 
-   for (let input1 = 0; input1 < sims.length; input1++) {
-      for (let input2 = input1+1; input2 < sims.length; input2++) {
-         console.log(`${files[input1]} & ${files[input2]}: ${sims[input1][input2]}`);
+   for (let input1 = 0; input1 < files.length; input1++) {
+      for (let input2 = input1+1; input2 < files.length; input2++) {
+         console.log(`${files[input1]} & ${files[input2]}: ${sims.at(input1, input2)}`);
       }
    }
 }
