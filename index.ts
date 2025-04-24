@@ -3,17 +3,54 @@ import {SuffixTree} from "./src/lib/suffixTree.js";
 import {readDir} from "./src/lib/reader.js";
 import Parser, {Language} from "tree-sitter";
 import Python from "tree-sitter-python";
+import Java from "tree-sitter-java";
+import C from "tree-sitter-c";
 
-function runPluto() {
+import {Command, Option} from "commander";
+
+const program = new Command();
+
+program
+    .argument(
+       "<path>",
+       "Input file(s) for the analysis. Can be a list of source code files, " +
+       "a CSV-file, or a zip-file with a top level info.csv file."
+    )
+    .addOption(
+       new Option("-l, --language <language>", "Programming language used in the submitted files.")
+           .choices(['java', 'python', 'c']).makeOptionMandatory(true)
+    )
+    .option(
+        "-m, --min-maximal-pair-length <integer>",
+        "The minimal length of a maximal pair.",
+        x => parseInt(x),
+        15
+    )
+    .option(
+        "-o, --output-destination <path>",
+        "Path where to write the output report to. " +
+        "This has no effect when the output format is set to 'terminal'.",
+        "out/"
+    )
+    .action((path, options) => run(path, { ...options , ...program.opts() }))
+   .parse(process.argv)
+
+function run(path: string, options: any) {
    const parser = new Parser();
-   parser.setLanguage(Python as Language);
 
-   const [files, content] = readDir("../dolos-cases/Valknut/files/data");
-   // const [files, content] = readDir("../dolos-benchmark/datasets/plutokiller");
+   if (options.language === "java") {
+      parser.setLanguage(Java as Language);
+   } else if (options.language === "python") {
+      parser.setLanguage(Python as Language);
+   } else if (options.language === "c") {
+      parser.setLanguage(C as Language);
+   }
+
+   const [files, content] = readDir(path);
    const codes = content.map(t => textToNumbers(parser, t));
 
    console.time("pluto");
-   const suffixTree = new SuffixTree(codes, {minMaximalPairLength: 15});
+   const suffixTree = new SuffixTree(codes, {minMaximalPairLength: options.minMaximalPairLength});
    console.timeEnd("pluto");
 
    console.time("lcs");
@@ -31,9 +68,3 @@ function runPluto() {
    }
 }
 
-function main(): void {
-
-   runPluto();
-}
-
-main();

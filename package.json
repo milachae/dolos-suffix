@@ -1,10 +1,15 @@
 {
+  "name": "@dolos/dolos-suffix",
+  "type": "module",
+  "export": "./dist/index.js",
+  "bin": {
+    "dolos": "dist/index.js"
+  },
   "scripts": {
     "start": "npm run build && node dist/index.js",
     "build": "tsc --build --verbose",
     "test": "tsc --build && ava --serial"
   },
-  "type": "module",
   "devDependencies": {
     "ava": "^6.2.0",
     "typescript": "^5.7.2"
@@ -12,7 +17,10 @@
   "dependencies": {
     "@types/node": "^22.13.4",
     "bitset": "^5.2.3",
+    "commander": "^13.1.0",
     "tree-sitter": "^0.22.4",
+    "tree-sitter-c": "^0.23.5",
+    "tree-sitter-java": "^0.23.5",
     "tree-sitter-python": "^0.23.6"
   }
 }

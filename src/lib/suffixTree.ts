@@ -401,28 +401,31 @@ export class SuffixTree {
         return maximalPairs;
     }
 
+    private similarity(input1: number, input2: number, pairs: MaximalPair[]): number {
+        let overlap_i1 = new BitSet();
+        let overlap_i2 = new BitSet();
+
+        for (const maximalPair of pairs) {
+            for (const start of maximalPair.starts) {
+                let rangeStart = start.start;
+                let rangeEnd = rangeStart+ maximalPair.length-1;
+                const overlap = start.input === input1 ? overlap_i1 : overlap_i2;
+                overlap.setRange(rangeStart,rangeEnd,1)
+            }
+        }
+
+        let total_overlap = overlap_i1.cardinality() + overlap_i2.cardinality()
+        let total_length = this.seqs[input1].length + this.seqs[input2].length;
+        return total_overlap / total_length;
+    }
+
     public similarities(): PairArray<number> {
         const sim: PairArray<number> = new PairArray(this.seqs.length, 0);
         const pairs = this.maximalPairs()
 
         for (let input1 = 0; input1 < this.seqs.length; input1++) {
             for (let input2 = input1+1; input2 < this.seqs.length; input2++) {
-
-                let overlap_i1 = new BitSet();
-                let overlap_i2 = new BitSet();
-
-                for (const maximalPair of pairs.at(input1, input2)) {
-                    for (const start of maximalPair.starts) {
-                        if (start.input === input1) {
-                            overlap_i1.setRange(start.start,start.start+ maximalPair.length-1,1)
-                        } else {
-                            overlap_i2.setRange(start.start,start.start+ maximalPair.length-1,1)
-                        }
-                    }
-                }
-
-                let total_overlap = overlap_i1.cardinality() + overlap_i2.cardinality()
-                sim.set(input1, input2, total_overlap / (this.seqs[input1].length + this.seqs[input2].length));
+                sim.set(input1, input2, this.similarity(input1, input2, pairs.at(input1, input2)));
             }
         }
 
@@ -444,11 +447,13 @@ export class SuffixTree {
 
         let index = 0;
         let notInTree = false;
-        let currentNode: SuffixTreeNode = this.root;
+        let currentNode: SuffixTreeNode | undefined = this.root;
 
         while(index < sequence.length && !notInTree) {
-            if (currentNode.children.has(sequence[index])) {
-                currentNode = currentNode.children.get(sequence[index])! // safe because checked in if;
+
+            currentNode = currentNode?.children.get(sequence[index]);
+
+            if (currentNode !== undefined) {
                 let length = currentNode.end.value - currentNode.start;
 
                 const edge = this.seqs[currentNode.input].slice(currentNode.start, currentNode.end.value);
@@ -461,6 +466,7 @@ export class SuffixTree {
             } else {
                 notInTree = true;
             }
+
         }
         return !notInTree;
     }
