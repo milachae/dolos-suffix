@@ -35,16 +35,15 @@ program
     .action((path, options) => run(path, { ...options , ...program.opts() }))
    .parse(process.argv)
 
+const LANGUAGEMAP: {[key: string]: Language} = {
+    "java": Java as Language,
+    "python": Python as Language,
+    "c": C as Language,
+}
+
 function run(path: string, options: any) {
    const parser = new Parser();
-
-   if (options.language === "java") {
-      parser.setLanguage(Java as Language);
-   } else if (options.language === "python") {
-      parser.setLanguage(Python as Language);
-   } else if (options.language === "c") {
-      parser.setLanguage(C as Language);
-   }
+   parser.setLanguage(LANGUAGEMAP[options.language]);
 
    const [files, content] = readDir(path);
    const codes = content.map(t => textToNumbers(parser, t));
