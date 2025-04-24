@@ -7,6 +7,7 @@ import Java from "tree-sitter-java";
 import C from "tree-sitter-c";
 
 import {Command, Option} from "commander";
+import {writeSimilarities} from "./src/lib/writer.js";
 
 const program = new Command();
 
@@ -62,10 +63,6 @@ function run(path: string, options: any) {
    const sims = suffixTree.similarities();
    console.timeEnd("simularities");
 
-   for (let input1 = 0; input1 < files.length; input1++) {
-      for (let input2 = input1+1; input2 < files.length; input2++) {
-         console.log(`${files[input1]} & ${files[input2]}: ${sims.at(input1, input2)}`);
-      }
-   }
+   writeSimilarities(files, sims, options.outputDestination);
 }
 
