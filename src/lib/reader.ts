@@ -5,8 +5,15 @@ import {readFileSync, readdirSync} from "fs";
  * @param dir A directory with files.
  * @return A tuple (files, content), The first element contains filenames and the second element is the content of all the files as strings.
  */
-export function readDir(dir: string): [string[], string[]] {
-    let files = readdirSync(dir);
+
+const LANGUAGE_EXTENSIONS: {[key: string]: string} = {
+    "java": ".java",
+    "python": ".py",
+    "c": ".c"
+}
+
+export function readDir(dir: string, language: string): [string[], string[]] {
+    let files = readdirSync(dir).filter((file:string) => file.endsWith(LANGUAGE_EXTENSIONS[language]));
     let content = readFiles(files.map((file: string) => `${dir}/${file}`));
     return [files, content];
 }
