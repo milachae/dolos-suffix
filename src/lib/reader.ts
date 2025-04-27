@@ -8,7 +8,7 @@ import {readFileSync, readdirSync} from "fs";
 
 const LANGUAGE_EXTENSIONS: {[key: string]: string} = {
     "java": ".java",
-    "python": ".py",
+    "py": ".py",
     "c": ".c"
 }
 

@@ -19,7 +19,7 @@ program
     )
     .addOption(
        new Option("-l, --language <language>", "Programming language used in the submitted files.")
-           .choices(['java', 'python', 'c']).makeOptionMandatory(true)
+           .choices(['java', 'py', 'c']).makeOptionMandatory(true)
     )
     .option(
         "-m, --min-maximal-pair-length <integer>",
@@ -42,7 +42,7 @@ function run(path: string, options: any) {
 
    const LANGUAGEMAP: {[key: string]: Language} = {
       "java": Java as Language,
-      "python": Python as Language,
+      "py": Python as Language,
       "c": C as Language,
    }
 
@@ -55,9 +55,9 @@ function run(path: string, options: any) {
    const suffixTree = new SuffixTree(codes, {minMaximalPairLength: options.minMaximalPairLength});
    console.timeEnd("pluto");
 
-   console.time("lcs");
+/*   console.time("lcs");
    const a = suffixTree.allLongestCommonSubstrings();
-   console.timeEnd("lcs");
+   console.timeEnd("lcs");*/
 
    console.time("simularities");
    const sims = suffixTree.similarities();

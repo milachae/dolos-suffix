@@ -1,5 +1,5 @@
 import {SuffixTreeNode} from "./suffixTreeNode.js";
-import {arrayStartsWith, assert, onlyPositiveNumbers} from "./utils.js";
+import {arrayStartsWith, assert, mergeMapsOfList, onlyPositiveNumbers} from "./utils.js";
 import {PairArray} from "./PairArray.js";
 import {BitSet} from "bitset";
 
@@ -270,7 +270,7 @@ export class SuffixTree {
      * @param input2 The index of the second input
      */
     public longestCommonSubstring(input1: number, input2: number): number {
-        console.assert(input1 >= 0 && input2 >= 0 && input1 < this.seqs.length && input2 < this.seqs.length);
+        assert(input1 >= 0 && input2 >= 0 && input1 < this.seqs.length && input2 < this.seqs.length);
         return this.longestCommonSubsequenceRecursive(input1, input2, this.root);
     }
 
@@ -307,25 +307,20 @@ export class SuffixTree {
     //////////////// Maximal pairs ////////////////
     ///////////////////////////////////////////////
 
-    /**
-     * All of the positions of the first array are paired with the positions for the second array for te given length.
-     * @param length
-     * @param startPositions1
-     * @param startPositions2
-     * @param pairs
-     * @private
-     */
-    private addPairs(length: number, startPositions1: StartPosition[], startPositions2: StartPosition[], pairs: PairArray<MaximalPair[]>) {
-        for (let sp1 of startPositions1) {
-            for (let sp2 of startPositions2) {
-                if (sp1.input !== sp2.input) {
-                    const i1 = sp1.input < sp2.input ? sp1.input : sp2.input;
-                    const i2 = sp1.input < sp2.input ? sp2.input : sp1.input;
+    private createLeafMaps(node: SuffixTreeNode, depth: number) {
+        let leafMaps: Map<number, StartPosition[]>[] = [];
 
-                    pairs.at(i1, i2).push({starts: [sp1, sp2], length: length})
-                }
-            }
+        for (const input of node.inputs) {
+            let leftMap: Map<number, StartPosition[]> = new Map();
+
+            const startIndex = this.seqs[input].length - 1 - depth;
+            let leftChar = startIndex === 0 ? -1 : this.seqs[input][startIndex - 1];
+            leftMap.set(leftChar, [{start: startIndex, input: input}]);
+
+            leafMaps.push(leftMap);
         }
+
+        return leafMaps;
     }
 
     /**
@@ -337,69 +332,70 @@ export class SuffixTree {
     private unionValues(arrayMaps: Map<number, StartPosition[]>[], k:number): StartPosition[] {
         let union = [];
         for (const map of arrayMaps) {
-            for(const [key, value] of map) {
-                if (key !== k || key === -1) { // Strings that start with the same sequence also are a pair but have the same left value
-                    union.push(...value);
+            for(const [startIndex, startPositions] of map) {
+                if (startIndex !== k || startIndex === -1) { // Strings that start with the same sequence also are a pair but have the same left value
+                    union.push(...startPositions);
                 }
             }
         }
         return union;
     }
 
-    private maximalPairsRecursive(node: SuffixTreeNode, depth: number, pairs: PairArray<MaximalPair[]>) {
-
-        let childrenMaps: Map<number, StartPosition[]>[] = [];
-        depth += node.textLength()
-
-        if (node.isLeaf()) {
-            for (const input of node.inputs) {
-                let leftMap: Map<number, StartPosition[]> = new Map();
-
-                const startIndex = this.seqs[input].length - 1 - depth;
-                let leftChar = startIndex === 0 ? -1 : this.seqs[input][startIndex - 1];
-                leftMap.set(leftChar, [...(leftMap.get(leftChar) || []), {start: startIndex, input: input}]);
-
-                childrenMaps.push(leftMap);
-            }
-
-        } else {
-            // retrieve all the child maps
-            for (const child of node.children.values()) {
-                childrenMaps.push(this.maximalPairsRecursive(child, depth, pairs));
-            }
-        }
-
-        // calculate the maximal pairs only for pairs with a length longer than the allowed minimum
-        if (depth >= this.options.minMaximalPairLength) {
-            for (const [i, map] of childrenMaps.entries()) {
-                for (const [leftChar, startPositions] of map) {
-                    let union: StartPosition[] = this.unionValues(childrenMaps.slice(i+1, childrenMaps.length), leftChar);
-                    this.addPairs(depth, startPositions, union, pairs);
+    /**
+     * All of the positions of the first array are paired with the positions for the second array for te given length.
+     */
+    private addPairs(length: number, startPositions1: StartPosition[], startPositions2: StartPosition[], pairs: PairArray<MaximalPair[]>) {
+        for (let sp1 of startPositions1) {
+            for (let sp2 of startPositions2) {
+                if (sp1.input !== sp2.input) {
+                    pairs.at(sp1.input, sp2.input).push({starts: [sp1, sp2], length: length})
                 }
             }
         }
+    }
 
-        let leftMap: Map<number, StartPosition[]> = new Map();
+    private generatePairs(depth: number, childrenMaps: Map<number, StartPosition[]>[], pairs: PairArray<MaximalPair[]>) {
+        for (const [i, map] of childrenMaps.entries()) {
+            for (const [leftChar, startPositions] of map) {
+                let union: StartPosition[] = this.unionValues(childrenMaps.slice(i+1, childrenMaps.length), leftChar);
+                this.addPairs(depth, startPositions, union, pairs);
+            }
+        }
+    }
 
-        // create the map of the current node
-        for (let childMap of childrenMaps){
-            for (let [key, value] of childMap) {
-                leftMap.set(key, [...(leftMap.get(key) || []), ...value]);
+    private maximalPairsRecursive(node: SuffixTreeNode, depth: number, pairs: PairArray<MaximalPair[]>) {
+
+        let maps: Map<number, StartPosition[]>[] = [];
+
+        if (node.isLeaf()) {
+            maps = this.createLeafMaps(node, depth);
+        } else {
+            // retrieve all the child maps
+            for (const child of node.children.values()) {
+                maps.push(this.maximalPairsRecursive(child, depth + child.textLength(), pairs));
             }
         }
 
-        // calculate all pairs
-        return leftMap;
+        if (depth >= this.options.minMaximalPairLength) {
+            this.generatePairs(depth, maps, pairs);
+        }
+
+        // create the map of the current node
+        return mergeMapsOfList(maps);
     }
 
     /**
-     *
+     * Find all the maximal pairs between all the different inputs.
      */
     public maximalPairs() {
         let maximalPairs: PairArray<MaximalPair[]> = new PairArray(this.seqs.length, () => []);
         this.maximalPairsRecursive(this.root, 0, maximalPairs);
         return maximalPairs;
     }
+
+    ///////////////////////////////////////////////
+    ///////////////// Similarity //////////////////
+    ///////////////////////////////////////////////
 
     private similarity(input1: number, input2: number, pairs: MaximalPair[]): number {
         let overlap_i1 = new BitSet();

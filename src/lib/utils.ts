@@ -1,3 +1,5 @@
+import {StartPosition} from "./suffixTree.js";
+
 export function assert(condition: boolean, message?: string): asserts condition {
     if (!condition) {
         throw new Error(message || "Assertion failed");
@@ -22,4 +24,17 @@ export function arrayStartsWith(a1: number[], a2: number[]): boolean {
 
 export function onlyPositiveNumbers(sequence: number[]): boolean {
     return sequence.every(n => n > 0);
+}
+
+export function mergeMapsOfList<Key, Value>(maps: Map<Key, Value[]>[]) {
+    let newMap: Map<Key, Value[]> = new Map();
+
+    for (const childMap of maps) {
+        for (const [key, value] of childMap) {
+            const existing = newMap.get(key) || [];
+            newMap.set(key, existing.concat(value));
+        }
+    }
+
+    return newMap;
 }
