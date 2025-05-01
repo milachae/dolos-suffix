@@ -51,17 +51,17 @@ function run(path: string, options: any) {
    const [files, content] = readDir(path, options.language);
    const codes = content.map(t => textToNumbers(parser, t));
 
-   console.time("pluto");
+   // console.time("pluto");
    const suffixTree = new SuffixTree(codes, {minMaximalPairLength: options.minMaximalPairLength});
-   console.timeEnd("pluto");
+   // console.timeEnd("pluto");
 
-/*   console.time("lcs");
+   // console.time("lcs");
    const a = suffixTree.allLongestCommonSubstrings();
-   console.timeEnd("lcs");*/
+   // console.timeEnd("lcs");
 
-   console.time("simularities");
+   // console.time("simularities");
    const sims = suffixTree.similarities();
-   console.timeEnd("simularities");
+   // console.timeEnd("simularities");
 
    writeSimilarities(files, sims, options.outputDestination);
 }
