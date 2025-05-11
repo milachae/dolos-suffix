@@ -7,7 +7,7 @@ import Java from "tree-sitter-java";
 import C from "tree-sitter-c";
 
 import {Command, Option} from "commander";
-import {writeSimilarities} from "./src/lib/writer.js";
+import {writeData} from "./src/lib/writer.js";
 
 const program = new Command();
 
@@ -51,18 +51,12 @@ function run(path: string, options: any) {
    const [files, content] = readDir(path, options.language);
    const codes = content.map(t => textToNumbers(parser, t));
 
-   // console.time("pluto");
    const suffixTree = new SuffixTree(codes, {minMaximalPairLength: options.minMaximalPairLength});
-   // console.timeEnd("pluto");
 
-/*   console.time("lcs");
-   const a = suffixTree.allLongestCommonSubstrings();
-   console.timeEnd("lcs");*/
-
-   console.time("similarities");
+   console.time("analyse");
    const [l, s] = suffixTree.analyse();
-   console.timeEnd("similarities");
+    console.timeEnd("analyse");
 
-   writeSimilarities(files, s, options.outputDestination);
+    writeData(files, l, s, options.outputDestination);
 }
 

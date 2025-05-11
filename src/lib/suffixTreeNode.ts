@@ -1,21 +1,19 @@
-let ID: number = 0;
 
 /**
- *
+ * A node in the suffix tree.
+ * The node contains a start and end index of the string it represents.
+ * The begin index is inclusive and the end index is exclusive.
  */
 export class SuffixTreeNode {
 
+    private static ID: number = 0;
     public children: Map<number, SuffixTreeNode> = new Map<number, SuffixTreeNode>();
     public suffixLink: SuffixTreeNode | undefined;
-    public id: number = 0;
-    public leaf: boolean = false;
+    public readonly id: number = 0;
     public inputs: number[];
 
-    // start inclusive
-    // end exclusive
     constructor(public start: number, public end: { value: number }, public input: number) {
-        this.id = ID;
-        ID++;
+        this.id = SuffixTreeNode.ID++;
         this.inputs = [input];
     }
 

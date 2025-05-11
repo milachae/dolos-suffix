@@ -46,8 +46,8 @@ export class SuffixTree {
 
     private readonly seqs:number[][] = [];
 
-    private lengthsLongestCommonSubstrings: PairArray<number> | undefined;
-    private similarities: PairArray<number> | undefined;
+    private longestFragments?: PairArray<number>;
+    private similarities?: PairArray<number>;
 
     // Variables needed during the building phase
     private end: { value: number } = { value: 0 };
@@ -57,7 +57,7 @@ export class SuffixTree {
     private options: SuffixTreeOptions = {minMaximalPairLength: 1};
 
     constructor(sequence: number[][], options?: SuffixTreeOptions) {
-        if (options !== undefined) {
+        if (options) {
             this.options = options;
         }
 
@@ -241,15 +241,15 @@ export class SuffixTree {
     ///////////////////////////////////////////////
 
     public getLenghtsLongestCommonSubstrings():  PairArray<number> {
-        if (this.lengthsLongestCommonSubstrings === undefined) {
+        if (!this.longestFragments) {
             this.analyse();
         }
-        assert(this.lengthsLongestCommonSubstrings !== undefined);
-        return this.lengthsLongestCommonSubstrings;
+        assert(this.longestFragments !== undefined);
+        return this.longestFragments;
     }
 
     public getSimilarities(): PairArray<number> {
-        if (this.similarities === undefined) {
+        if (!this.similarities) {
             this.analyse();
         }
         assert(this.similarities !== undefined);
@@ -257,28 +257,26 @@ export class SuffixTree {
     }
 
     public analyse(): [PairArray<number>, PairArray<number>] {
-        const r1 = new PairArray(this.seqs.length, 0);
-        const r2 = new PairArray<[BitSet, BitSet]>(this.seqs.length, () => [new BitSet(), new BitSet()]);
+        this.longestFragments = new PairArray(this.seqs.length, 0);
+        const overlapBitsets = new PairArray<[BitSet, BitSet]>(this.seqs.length, () => [new BitSet(), new BitSet()]);
 
         const process = (sp1: StartPosition, sp2: StartPosition, length: number) => {
             let i1 = sp1.input;
             let i2 = sp2.input;
 
-            if (r1.at(i1, i2) < length) {
-                r1.set(i1, i2, length);
+            if (this.longestFragments!.at(i1, i2) < length) {
+                this.longestFragments!.set(i1, i2, length);
             }
 
-            let bitsets = r2.at(i1,i2);
+            let bitsets = overlapBitsets.at(i1,i2);
             bitsets[sp1.input < sp2.input ? 0 : 1].setRange(sp1.start,sp1.start + length-1,1);
             bitsets[sp1.input < sp2.input ? 1 : 0].setRange(sp2.start,sp2.start + length-1,1);
         }
 
         this.findMaximalPairs(this.root, 0, process);
+        this.calculateSimilarities(overlapBitsets);
 
-        const r3 = this.calculateSimilarities(r2);
-
-        [this.lengthsLongestCommonSubstrings, this.similarities] = [r1, r3];
-        return [this.lengthsLongestCommonSubstrings, this.similarities]
+        return [this.longestFragments!, this.similarities!]
     }
 
 
@@ -286,14 +284,15 @@ export class SuffixTree {
     //////////////// Maximal pairs ////////////////
     ///////////////////////////////////////////////
 
-    private createLeafMaps(node: SuffixTreeNode, depth: number) {
+
+    private createLeafMaps(node: SuffixTreeNode, depth: number): Map<number, StartPosition[]>[] {
         let leafMaps: Map<number, StartPosition[]>[] = [];
 
         for (const input of node.inputs) {
-            let leftMap: Map<number, StartPosition[]> = new Map();
-
             const startIndex = this.seqs[input].length - 1 - depth;
             let leftChar = startIndex === 0 ? -1 : this.seqs[input][startIndex - 1];
+
+            let leftMap: Map<number, StartPosition[]> = new Map();
             leftMap.set(leftChar, [{start: startIndex, input: input}]);
 
             leafMaps.push(leftMap);
@@ -323,7 +322,7 @@ export class SuffixTree {
     /**
      * All of the positions of the first array are paired with the positions for the second array for te given length.
      */
-    private processPair(length: number, startPositions1: StartPosition[], startPositions2: StartPosition[], process: (sp1: StartPosition, sp2: StartPosition, length: number) => void) {
+    private processPairs(length: number, startPositions1: StartPosition[], startPositions2: StartPosition[], process: (sp1: StartPosition, sp2: StartPosition, length: number) => void) {
         for (let sp1 of startPositions1) {
             for (let sp2 of startPositions2) {
                 if (sp1.input !== sp2.input) {
@@ -337,7 +336,7 @@ export class SuffixTree {
         for (const [i, map] of childrenMaps.entries()) {
             for (const [leftChar, startPositions] of map) {
                 let union: StartPosition[] = this.unionValues(childrenMaps.slice(i+1, childrenMaps.length), leftChar);
-                this.processPair(depth, startPositions, union, process);
+                this.processPairs(depth, startPositions, union, process);
             }
         }
     }
@@ -373,16 +372,14 @@ export class SuffixTree {
         return total_overlap / total_length;
     }
 
-    private calculateSimilarities(bits: PairArray<[BitSet, BitSet]>): PairArray<number> {
-        const sim: PairArray<number> = new PairArray(this.seqs.length, 0);
+    private calculateSimilarities(bits: PairArray<[BitSet, BitSet]>) {
+        this.similarities = new PairArray(this.seqs.length, 0);
 
         for (let input1 = 0; input1 < this.seqs.length; input1++) {
             for (let input2 = input1+1; input2 < this.seqs.length; input2++) {
-                sim.set(input1, input2, this.similarity(input1, input2, bits.at(input1, input2)));
+                this.similarities.set(input1, input2, this.similarity(input1, input2, bits.at(input1, input2)));
             }
         }
-
-        return sim;
     }
 
 
