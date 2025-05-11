@@ -25,7 +25,7 @@ export class SuffixTreeNode {
     }
 
     public length(): number {
-        return this.end.value - this.start
+        return this.end.value - this.start;
     }
 
     public isLeaf(): boolean {
@@ -37,7 +37,7 @@ export class SuffixTreeNode {
         for (const [k, child] of this.children) {
             children[k] = child.toObject();
         }
-        return {"start": this.start, "end": this.end.value, "input": this.input, "children": children};
+        return {start: this.start, end: this.end.value, input: this.input, children: children};
     }
 
     public addInput(...inputs: number[]) {

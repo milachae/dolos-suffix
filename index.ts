@@ -55,14 +55,14 @@ function run(path: string, options: any) {
    const suffixTree = new SuffixTree(codes, {minMaximalPairLength: options.minMaximalPairLength});
    // console.timeEnd("pluto");
 
-   // console.time("lcs");
+/*   console.time("lcs");
    const a = suffixTree.allLongestCommonSubstrings();
-   // console.timeEnd("lcs");
+   console.timeEnd("lcs");*/
 
-   // console.time("simularities");
-   const sims = suffixTree.similarities();
-   // console.timeEnd("simularities");
+   console.time("similarities");
+   const [l, s] = suffixTree.analyse();
+   console.timeEnd("similarities");
 
-   writeSimilarities(files, sims, options.outputDestination);
+   writeSimilarities(files, s, options.outputDestination);
 }
 

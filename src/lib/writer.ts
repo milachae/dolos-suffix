@@ -1,5 +1,5 @@
-import {PairArray} from "./PairArray.js";
-import {createWriteStream, mkdir} from "node:fs";
+import { PairArray } from "./PairArray.js";
+import { createWriteStream, mkdir } from "node:fs";
 
 export function writeSimilarities(files: string[], similarities: PairArray<number>, dirName: string) {
     mkdir(dirName, { recursive: true }, (err) => {

@@ -1,5 +1,5 @@
 import test from "ava";
-import {PairArray} from "../lib/PairArray.js";
+import { PairArray } from "../lib/PairArray.js";
 
 test("Should create a PairArray", t=> {
     const map = new PairArray<number>(10, 0);

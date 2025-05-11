@@ -1,9 +1,7 @@
 import test from "ava";
-import {SuffixTree} from "../lib/suffixTree.js";
+import { SuffixTree } from "../lib/suffixTree.js";
 import {
     generateRandomStrings,
-    longestCommonSubstringLengthDyn,
-    stringsToNumbers,
     testAllSubstrings,
 } from "./_util.js";
 

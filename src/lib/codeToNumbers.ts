@@ -1,4 +1,4 @@
-import Parser, {SyntaxNode} from "tree-sitter";
+import Parser, { SyntaxNode } from "tree-sitter";
 
 export function textToNumbers(parser: Parser, text: string): number[] {
     const tree = parser.parse(
