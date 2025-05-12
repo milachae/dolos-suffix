@@ -366,7 +366,7 @@ export class SuffixTree {
     ///////////////// Similarity //////////////////
     ///////////////////////////////////////////////
 
-    private similarity(input1: number, input2: number, pairs: [BitSet, BitSet]): number {
+    private calculateSimilarity(input1: number, input2: number, pairs: [BitSet, BitSet]): number {
         let total_overlap = pairs[0].cardinality() + pairs[1].cardinality()
         let total_length = this.seqs[input1].length + this.seqs[input2].length - 2;
         return total_overlap / total_length;
@@ -377,7 +377,7 @@ export class SuffixTree {
 
         for (let input1 = 0; input1 < this.seqs.length; input1++) {
             for (let input2 = input1+1; input2 < this.seqs.length; input2++) {
-                this.similarities.set(input1, input2, this.similarity(input1, input2, bits.at(input1, input2)));
+                this.similarities.set(input1, input2, this.calculateSimilarity(input1, input2, bits.at(input1, input2)));
             }
         }
     }
