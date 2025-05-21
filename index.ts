@@ -14,8 +14,7 @@ const program = new Command();
 program
     .argument(
        "<path>",
-       "Input file(s) for the analysis. Can be a list of source code files, " +
-       "a CSV-file, or a zip-file with a top level info.csv file."
+       "Path to the directory with all the input file(s) for the analysis."
     )
     .addOption(
        new Option("-l, --language <language>", "Programming language used in the submitted files.")
@@ -29,8 +28,7 @@ program
     )
     .option(
         "-o, --output-destination <path>",
-        "Path where to write the output report to. " +
-        "This has no effect when the output format is set to 'terminal'.",
+        "Directory path to save the output report.",
         "out/"
     )
     .action((path, options) => run(path, { ...options , ...program.opts() }))
