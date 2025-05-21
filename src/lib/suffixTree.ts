@@ -7,16 +7,10 @@ export interface SuffixTreeOptions {
     minMaximalPairLength: number;
 }
 
-export interface MaximalPair {
-    starts: [StartPosition, StartPosition],
-    length: number,
-}
-
 export interface StartPosition {
     start: number,
     input: number
 }
-
 
 class ActivePosition {
     private readonly startNode: SuffixTreeNode;
@@ -52,6 +46,9 @@ export class SuffixTree {
 
     private readonly seqs:number[][] = [];
 
+    private longestFragments?: PairArray<number>;
+    private similarities?: PairArray<number>;
+
     // Variables needed during the building phase
     private end: { value: number } = { value: 0 };
     private remainingSuffixCount: number = 0;
@@ -60,7 +57,7 @@ export class SuffixTree {
     private options: SuffixTreeOptions = {minMaximalPairLength: 1};
 
     constructor(sequence: number[][], options?: SuffixTreeOptions) {
-        if (options !== undefined) {
+        if (options) {
             this.options = options;
         }
 
@@ -86,8 +83,7 @@ export class SuffixTree {
 
     /**
      * Walk down the activeNode according to the activeLength
-     * @param input
-     * @private
+     * @param input The currently processed input
      */
     private walkDown(input: number) {
         let node_activeEdge = this.activePos.getActiveEdgeNode();
@@ -106,7 +102,6 @@ export class SuffixTree {
      * @param input
      * @param phase
      * @param end
-     * @private
      */
     private extend(input:number, phase: number, end: boolean) {
 
@@ -216,7 +211,6 @@ export class SuffixTree {
     /**
      * Propagate the inputs of all leaves bottom-up through the tree.
      * @param node
-     * @private
      */
     private propagateInputs(node:SuffixTreeNode): number[] {
         for (const child of node.children.values()) {
@@ -228,7 +222,6 @@ export class SuffixTree {
 
     /**
      * Start building the suffix tree.
-     * @private
      */
     private build() {
         for (let input = 0; input < this.seqs.length; input++) {
@@ -244,62 +237,46 @@ export class SuffixTree {
     }
 
     ///////////////////////////////////////////////
-    ////////// Longest common substring ///////////
+    ///////////////// Analyse /////////////////////
     ///////////////////////////////////////////////
 
-    private longestCommonSubsequenceRecursive(input1: number, input2: number, node: SuffixTreeNode): number {
-
-        // If the node does not contain both inputs, it does not have this substring in common
-        if (!(node.inputs.includes(input1) && node.inputs.includes(input2))) {
-            return 0;
+    public getLenghtsLongestCommonSubstrings():  PairArray<number> {
+        if (!this.longestFragments) {
+            this.analyse();
         }
+        assert(this.longestFragments !== undefined);
+        return this.longestFragments;
+    }
 
-        let maxChildLength = 0;
-        if (!node.isLeaf()) {
-            for (const child of node.children.values()) {
-                const childLength = this.longestCommonSubsequenceRecursive(input1, input2, child);
-                maxChildLength = Math.max(maxChildLength, childLength);
+    public getSimilarities(): PairArray<number> {
+        if (!this.similarities) {
+            this.analyse();
+        }
+        assert(this.similarities !== undefined);
+        return this.similarities;
+    }
+
+    public analyse(): [PairArray<number>, PairArray<number>] {
+        this.longestFragments = new PairArray(this.seqs.length, 0);
+        const overlapBitsets = new PairArray<[BitSet, BitSet]>(this.seqs.length, () => [new BitSet(), new BitSet()]);
+
+        const process = (sp1: StartPosition, sp2: StartPosition, length: number) => {
+            let i1 = sp1.input;
+            let i2 = sp2.input;
+
+            if (this.longestFragments!.at(i1, i2) < length) {
+                this.longestFragments!.set(i1, i2, length);
             }
-        }
-        return node.textLength() + maxChildLength;
-    }
 
-    /**
-     * Calculate the longest common substring between 2 inputs.
-     * @param input1 The index of the first input
-     * @param input2 The index of the second input
-     */
-    public longestCommonSubstring(input1: number, input2: number): number {
-        assert(input1 >= 0 && input2 >= 0 && input1 < this.seqs.length && input2 < this.seqs.length);
-        return this.longestCommonSubsequenceRecursive(input1, input2, this.root);
-    }
-
-
-    private allLongestCommonSubstringsRecursive(node: SuffixTreeNode, depth:number, results: PairArray<number>){
-        depth += node.textLength();
-
-        for (const child of node.children.values()) {
-            this.allLongestCommonSubstringsRecursive(child, depth, results);
+            let bitsets = overlapBitsets.at(i1,i2);
+            bitsets[sp1.input < sp2.input ? 0 : 1].setRange(sp1.start,sp1.start + length-1,1);
+            bitsets[sp1.input < sp2.input ? 1 : 0].setRange(sp2.start,sp2.start + length-1,1);
         }
 
-        for (let i = 0; i < node.inputs.length; i++) {
-            for (let j = i+1; j < node.inputs.length; j++) {
-                const i_input = node.inputs[i];
-                const j_input = node.inputs[j];
-                if (results.at(i_input, j_input) < depth) {
-                    results.set(i_input, j_input, depth);
-                }
-            }
-        }
-    }
+        this.findMaximalPairs(this.root, 0, process);
+        this.calculateSimilarities(overlapBitsets);
 
-    /**
-     * Calculate all the longest common substrings between all pairs of inputs.
-     */
-    public allLongestCommonSubstrings():  PairArray<number> {
-        const results = new PairArray(this.seqs.length, 0);
-        this.allLongestCommonSubstringsRecursive(this.root, 0, results);
-        return results;
+        return [this.longestFragments!, this.similarities!]
     }
 
 
@@ -307,14 +284,15 @@ export class SuffixTree {
     //////////////// Maximal pairs ////////////////
     ///////////////////////////////////////////////
 
-    private createLeafMaps(node: SuffixTreeNode, depth: number) {
+
+    private createLeafMaps(node: SuffixTreeNode, depth: number): Map<number, StartPosition[]>[] {
         let leafMaps: Map<number, StartPosition[]>[] = [];
 
         for (const input of node.inputs) {
-            let leftMap: Map<number, StartPosition[]> = new Map();
-
             const startIndex = this.seqs[input].length - 1 - depth;
             let leftChar = startIndex === 0 ? -1 : this.seqs[input][startIndex - 1];
+
+            let leftMap: Map<number, StartPosition[]> = new Map();
             leftMap.set(leftChar, [{start: startIndex, input: input}]);
 
             leafMaps.push(leftMap);
@@ -344,26 +322,26 @@ export class SuffixTree {
     /**
      * All of the positions of the first array are paired with the positions for the second array for te given length.
      */
-    private addPairs(length: number, startPositions1: StartPosition[], startPositions2: StartPosition[], pairs: PairArray<MaximalPair[]>) {
+    private processPairs(length: number, startPositions1: StartPosition[], startPositions2: StartPosition[], process: (sp1: StartPosition, sp2: StartPosition, length: number) => void) {
         for (let sp1 of startPositions1) {
             for (let sp2 of startPositions2) {
                 if (sp1.input !== sp2.input) {
-                    pairs.at(sp1.input, sp2.input).push({starts: [sp1, sp2], length: length})
+                    process(sp1, sp2, length);
                 }
             }
         }
     }
 
-    private generatePairs(depth: number, childrenMaps: Map<number, StartPosition[]>[], pairs: PairArray<MaximalPair[]>) {
+    private generatePairs(depth: number, childrenMaps: Map<number, StartPosition[]>[], process: (sp1: StartPosition, sp2: StartPosition, length: number) => void) {
         for (const [i, map] of childrenMaps.entries()) {
             for (const [leftChar, startPositions] of map) {
                 let union: StartPosition[] = this.unionValues(childrenMaps.slice(i+1, childrenMaps.length), leftChar);
-                this.addPairs(depth, startPositions, union, pairs);
+                this.processPairs(depth, startPositions, union, process);
             }
         }
     }
 
-    private maximalPairsRecursive(node: SuffixTreeNode, depth: number, pairs: PairArray<MaximalPair[]>) {
+    private findMaximalPairs(node: SuffixTreeNode, depth: number, process: (sp1: StartPosition, sp2: StartPosition, length: number) => void) {
 
         let maps: Map<number, StartPosition[]>[] = [];
 
@@ -372,60 +350,36 @@ export class SuffixTree {
         } else {
             // retrieve all the child maps
             for (const child of node.children.values()) {
-                maps.push(this.maximalPairsRecursive(child, depth + child.textLength(), pairs));
+                maps.push(this.findMaximalPairs(child, depth + child.textLength(), process));
             }
         }
 
         if (depth >= this.options.minMaximalPairLength) {
-            this.generatePairs(depth, maps, pairs);
+            this.generatePairs(depth, maps, process);
         }
 
         // create the map of the current node
         return mergeMapsOfList(maps);
     }
 
-    /**
-     * Find all the maximal pairs between all the different inputs.
-     */
-    public maximalPairs() {
-        let maximalPairs: PairArray<MaximalPair[]> = new PairArray(this.seqs.length, () => []);
-        this.maximalPairsRecursive(this.root, 0, maximalPairs);
-        return maximalPairs;
-    }
-
     ///////////////////////////////////////////////
     ///////////////// Similarity //////////////////
     ///////////////////////////////////////////////
 
-    private similarity(input1: number, input2: number, pairs: MaximalPair[]): number {
-        let overlap_i1 = new BitSet();
-        let overlap_i2 = new BitSet();
-
-        for (const maximalPair of pairs) {
-            for (const start of maximalPair.starts) {
-                let rangeStart = start.start;
-                let rangeEnd = rangeStart+ maximalPair.length-1;
-                const overlap = start.input === input1 ? overlap_i1 : overlap_i2;
-                overlap.setRange(rangeStart,rangeEnd,1)
-            }
-        }
-
-        let total_overlap = overlap_i1.cardinality() + overlap_i2.cardinality()
-        let total_length = this.seqs[input1].length + this.seqs[input2].length;
+    private calculateSimilarity(input1: number, input2: number, pairs: [BitSet, BitSet]): number {
+        let total_overlap = pairs[0].cardinality() + pairs[1].cardinality()
+        let total_length = this.seqs[input1].length + this.seqs[input2].length - 2;
         return total_overlap / total_length;
     }
 
-    public similarities(): PairArray<number> {
-        const sim: PairArray<number> = new PairArray(this.seqs.length, 0);
-        const pairs = this.maximalPairs()
+    private calculateSimilarities(bits: PairArray<[BitSet, BitSet]>) {
+        this.similarities = new PairArray(this.seqs.length, 0);
 
         for (let input1 = 0; input1 < this.seqs.length; input1++) {
             for (let input2 = input1+1; input2 < this.seqs.length; input2++) {
-                sim.set(input1, input2, this.similarity(input1, input2, pairs.at(input1, input2)));
+                this.similarities.set(input1, input2, this.calculateSimilarity(input1, input2, bits.at(input1, input2)));
             }
         }
-
-        return sim;
     }
 
 
@@ -434,10 +388,8 @@ export class SuffixTree {
     ///////////////////////////////////////////////
 
     /**
-     *
-     * @param text
-     * Checks if the suffix tree contains a given sequence.
-     * @param sequence
+     * Checks if the suffix tree contains a given substring.
+     * @param sequence The substring to search for.
      */
     public hasSubstring(sequence: number[]): boolean {
 
@@ -468,8 +420,8 @@ export class SuffixTree {
     }
 
     /**
-     *
-     * @param sequence
+     * Check if a suffix is present in the suffix tree.
+     * @param sequence The suffix to search for.
      */
     public hasSuffix(sequence: number[]): boolean {
         return this.hasSubstring(sequence.concat([0]));
@@ -480,12 +432,7 @@ export class SuffixTree {
     //////////////////// PRINT ////////////////////
     ///////////////////////////////////////////////
 
-    /**
-     *
-     * @param node
-     * @param depth
-     * @private
-     */
+
     private printRecursive(node: SuffixTreeNode, depth: number) {
         const spacing = "    ".repeat(depth);
         const start_stop = `(${node.start}, ${node.end.value})`

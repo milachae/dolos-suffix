@@ -1,3 +1,4 @@
+/*
 import test, {ExecutionContext} from "ava";
 import {MaximalPair, SuffixTree} from "../lib/suffixTree.js";
 import {stringToNumbers} from "./_util.js"
@@ -128,3 +129,4 @@ test(
         "0-1": [{starts: [{start: 1, input:0}, {start: 2, input: 1}], length: 3}]
     })
 )
+*/

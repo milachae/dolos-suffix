@@ -1,4 +1,4 @@
-import {readFileSync, readdirSync} from "fs";
+import { readFileSync, readdirSync } from "fs";
 
 /**
  * Read every files from the given directory.
@@ -7,9 +7,9 @@ import {readFileSync, readdirSync} from "fs";
  */
 
 const LANGUAGE_EXTENSIONS: {[key: string]: string} = {
-    "java": ".java",
-    "py": ".py",
-    "c": ".c"
+    java: ".java",
+    py: ".py",
+    c: ".c"
 }
 
 export function readDir(dir: string, language: string): [string[], string[]] {

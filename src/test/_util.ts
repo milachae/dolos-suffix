@@ -1,5 +1,5 @@
-import {SuffixTree} from "../lib/suffixTree.js";
-import {ExecutionContext} from "ava";
+import { SuffixTree } from "../lib/suffixTree.js";
+import { ExecutionContext } from "ava";
 
 export function stringToNumbers(str: string): number[] {
     let result: number[] = [];
@@ -7,7 +7,7 @@ export function stringToNumbers(str: string): number[] {
         result.push(character.toLowerCase().charCodeAt(0)+1);
     }
 
-    return result
+    return result;
 }
 
 export function stringsToNumbers(strs: string[]): number[][] {
@@ -16,7 +16,7 @@ export function stringsToNumbers(strs: string[]): number[][] {
         result.push(stringToNumbers(str));
     }
 
-    return result
+    return result;
 }
 
 function is1DArray(arr: any): boolean {
